@@ -1,0 +1,138 @@
+<html>
+<head>
+  <title>Remote Robot control</title>
+</head>
+
+<style>
+body {background-color: white}
+h1 {color:blue}
+button {
+	color: blue;
+	background:lightgrey;
+	border: 1px solid #000;
+	border-radius: 8px;
+	position: center;
+}
+.field_set_1{
+  border-color: green;
+  border-style: solid;
+  border-width: thick thick thick;
+}
+.field_set_2{
+  border-color: blue;
+  border-style: solid;
+  border-width: thick thick thick;
+}
+</style>
+
+<body>
+
+<div style="text-align:center">
+
+<center>
+<table><tr><td>
+<img style="height: 200px"src="images/roverLeft.jpg"></td><td>
+<h1>REMOTE ROBOT CONTROL</h1></td><td>
+<img style="height: 200px"src="images/roverRight.jpg"></td></tr>
+</table>
+</center>
+
+
+  <br/>
+  <fieldset class="field_set_1">
+  <table style="width:100%"><tr><td>
+  <img hspace="30" style="padding-left: 5px">
+  <fieldset>
+    <legend>Robot IP Address:</legend>
+
+    <input type="textbox" id="ip" onchange="setIP(this.value.toString())" >
+   </fieldset></td><td>
+
+  <img hspace="30" style="padding-left: 20px">
+  <fieldset>
+    <legend>User Name:</legend>
+    <input type="textbox" id="name" onchange="robotCommand('name ' + this.value.toString())" >
+   </fieldset></td></tr>
+  </table>
+  </fieldset>
+  <br />
+  <fieldset class="field_set_2">
+  <fieldset>
+    <legend>Robot Speed (Percent Top Speed):</legend>
+    <input style="width:100%" type="range" min="1" max="100" value="50" class="slider" id="speed" list="speedmarks" onchange="buddyRobotCommand('speed', 'speedValue', 'speed '+ this.value.toString())">
+    <datalist id="speedmarks">
+      <option value="0">
+      <option value="20">
+      <option value="40">
+      <option value="60">
+      <option value="80">
+      <option value="100">
+    </datalist>
+    <br />
+    <input type="textbox" id="speedValue" value="50" readonly>
+   </fieldset>
+  <br />
+      <fieldset>
+        <legend>Robot Movement:</legend>
+        <button style="height: 75px; width: 75px" onclick="robotCommand('forward')"><img style="height: 65px" src="images/forward.png"></button>
+        <br><br><br><br>
+        <img hspace="10" style="padding-left: 5px">
+        <button style="height: 75px; width: 75px" onclick="robotCommand('slideLeft')"><img style="height: 65px; width: 65px" src="images/slideLeft.jpg"></button>
+        <img hspace="20" style="padding-left: 10px">
+        <button style="height: 75px; width: 75px" onclick="robotCommand('spinLeft')"><img style="height: 65px; width: 65px" src="images/spinLeft.png"></button>
+        <img hspace="10" style="padding-left: 5px">
+        <button style="height: 75px; width: 75px" onclick="robotCommand('left')"><img style="height: 65px" src="images/left.png"></button>
+        <img hspace="20" style="padding-left: 10px">
+        <button style="height: 75px; width: 75px" onclick="robotCommand('stop')"><img style="height: 63px" src="images/stop.png"></button>
+        <img hspace="20" style="padding-left: 10px">
+        <button style="height: 75px; width: 75px" onclick="robotCommand('right')"><img style="height: 65px" src="images/right.png"></button>
+        <img hspace="10" style="padding-left: 5px">
+        <img hspace="10" style="padding-left: 5px">
+        <button style="height: 75px; width: 75px" onclick="robotCommand('spinRight')"><img style="height: 65px; width: 65px" src="images/spinRight.png"></button>
+        <img hspace="20" style="padding-left: 10px">
+        <button style="height: 75px; width: 75px" onclick="robotCommand('slideRight')"><img style="height: 65px; width: 65px" src="images/slideRight.jpg"></button>
+        <br><br><br><br>
+        <button style="height: 75px; width: 75px" onclick="robotCommand('backward')"><img style="height: 65px"src="images/reverse.png"></button>
+      </fieldset>
+  </fieldset>
+
+
+
+<script>
+  var HttpClient = function() {
+    this.get = function(aUrl, aCallback) {
+        var anHttpRequest = new XMLHttpRequest();
+        anHttpRequest.onreadystatechange = function() { 
+            if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+                aCallback(anHttpRequest.responseText);
+        }
+
+        anHttpRequest.open( "GET", aUrl, true );            
+        anHttpRequest.send( null );
+    }
+  }
+  
+  var client = new HttpClient();
+  var url = 'http://127.0.0.1/exec?param=';
+  
+  function robotCommand(command) {
+  	client.get(encodeURI(url + command), function(response) {
+    	console.log('event triggered:' + command);
+  	});
+    
+  }
+
+  function buddyRobotCommand(rangeId, textId, command) {
+    document.getElementById(textId).value = document.getElementById(rangeId).value;
+    robotCommand(command);
+  }
+  
+  function setIP(ip) {
+	url = 'http://' + ip + '/exec?param=';
+	console.log('url set: ' + url);
+  }
+        
+</script>
+
+</body>
+</html>
