@@ -96,7 +96,6 @@ It was found that if we use Arduino delay() functions in the sketch for timing, 
 The rover.ino sketch needs to be configured to match your needs and environment.
 <br />
 1. Define if you want the robot to be the leader or follower
-<br />
 ~~~~
     define _LEADER
     //#define _FOLLOWER
