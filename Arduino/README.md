@@ -97,22 +97,22 @@ The rover.ino sketch needs to be configured to match your needs and environment.
 <br />
 1. Define if you want the robot to be the leader or follower
 <br />
-    ~~~~
+~~~~
     define _LEADER
     //#define _FOLLOWER
-    ~~~~
-    Select the role by comment out the other. In this case, you want a leader.
+~~~~
+Select the role by comment out the other. In this case, you want a leader.
 2. Configure the Wifi parameters
-    ~~~~
+~~~~
     const char* ssid = "Kardinia701";
     const char* password = "myPassword";
-    ~~~~
-    Change the ssid and password for your Wifi connection.
+~~~~
+Change the ssid and password for your Wifi connection.
 2. Configure the MQTT server parameters
-    ~~~~
+~~~~
     const char* mqttServer = "broker.hivemq.com";
     const int mqttPort = 1883;
     const char* mqttUser = "rhtest";
     const char* mqttPassword = "rhtest";
-    ~~~~
-    Change the 4 parameters to connect to your MQTT server.
+~~~~
+Change the 4 parameters to connect to your MQTT server.
