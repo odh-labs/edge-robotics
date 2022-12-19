@@ -6,8 +6,8 @@ This is the repositiory for the Edge based Robotics AI/ML Demo. This architectur
 
 ## Folders
 
-- [Arduino, the IDE for programming and controlling the robots](https://github.com/odh-labs/edge-robotics/tree/main/Arduino)
+- [Arduino](https://github.com/odh-labs/edge-robotics/tree/main/Arduino) - an Ardunio sketch for controlling the robots including Wifi connectivity, MQTT server publish/subscribe capability and a RESTful API for robot control.
 - [Demos](https://github.com/odh-labs/edge-robotics/tree/main/demos) - with various video recordings, not yet ready for YouTube. [DEMO-LISTING.md](https://github.com/odh-labs/edge-robotics/blob/main/demos/_DEMO-LISTING.md) has more details
 - [java-api-accept-image](https://github.com/odh-labs/edge-robotics/tree/main/java-api-accept-image) - a Spring Boot based API that accepts an image and saves that image to disk
-- [mosquitto-running-on-microshift](https://github.com/odh-labs/edge-robotics/tree/main/mosquitto-running-on-microshift) - an MQTT Server
-- [remote-robot-control](https://github.com/odh-labs/edge-robotics/tree/main/remote-robot-control) - a web-based remote robot control javascript application
+- [mosquitto-running-on-microshift](https://github.com/odh-labs/edge-robotics/tree/main/mosquitto-running-on-microshift) - documented procedure for installing MicroShift on bare-metal and provided an image for deploying the Eclipse Mosquitto MQTT server with the proper configuration on quay.io together with a description on deploying it on MicroShift using the provided deplyment.yaml file.
+- [remote-robot-control](https://github.com/odh-labs/edge-robotics/tree/main/remote-robot-control) - a web-based remote robot control Javascript application for controlling the robot using the robot's RESTful API.
