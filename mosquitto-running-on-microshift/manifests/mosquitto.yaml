@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mosquitto
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: mosquitto
+  labels:
+    app: mosquitto
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mosquitto
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: mosquitto
+        version: v1
+    spec:
+      containers:
+        - resources:
+            limits:
+              cpu: '1'
+              memory: 1000Mi
+            requests:
+              cpu: '1'
+              memory: 800Mi
+          terminationMessagePath: /dev/termination-log
+          name: mosquitto
+          securityContext:
+            privileged: false
+          ports:
+            - name: mosquitto
+              containerPort: 1883
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          terminationMessagePolicy: File
+          image: quay.io/andyyuen/mymosquitto
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      serviceAccountName: mosquitto
+      serviceAccount: mosquitto
+      securityContext: {}
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mosquitto
+  labels:
+    app: mosquitto
+    service: mosquitto
+spec:
+  ports:
+    - name: mosquitto
+      protocol: TCP
+      port: 1883
+      targetPort: 1883
+  type: NodePort
+  sessionAffinity: None
+  selector:
+    app: mosquitto
+
