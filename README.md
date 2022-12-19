@@ -1,6 +1,6 @@
 # Edge Robotics AI/ML Demo
 
-This is the repositiory for the Edge based Robotics AI/ML Demo. This architecture diagram depicts the currently proosed architecture. The solution is evolving and this will certainly change.
+This is the repositiory for the Edge based Robotics AI/ML Demo. This architecture diagram depicts the currently proposed architecture. The solution is evolving and this will certainly change.
 ![images/architecture-v1-edge-based-robots-demo.png](images/architecture-v1-edge-based-robots-demo.png)
 
 
