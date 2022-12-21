@@ -37,7 +37,7 @@ And after a few minutes, your MicroShift will be ready for action.
 
 ## 3 Creating an Eclipse Mosquitto Image
 Our robots use a MQTT server. We are using Mosquitto as our MQTT server. Sticking to my principle of not reinventing the wheel, I used another great time saver I found on Github:
-[mosquitto-openshift](https://github.com/kevinboone/mosquitto-openshift/mosquitto-openshift)
+[mosquitto-openshift](https://github.com/kevinboone/mosquitto-openshift/)
 
 I only need to make 1 change in the files/mosquitto.conf file from:
 ~~~~
