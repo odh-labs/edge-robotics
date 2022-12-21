@@ -60,6 +60,16 @@ oc create -f manifests/mosquitto.yaml
 
 oc get svc mosquitto -o yaml
 ~~~~
+As oc new-project might not be supported on MicroShift, create a namespace (ns) instead:
+~~~~
+oc create -f - << EOF
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mosquitto
+EOF
+~~~~
+
 I am exposing the mosquitto application using a NodePort and let MicroShift assign the node port number. The last command will show you the NodePort number assigned by MicroShift. Alternatively, you can modify the mosquitto.yaml file to specify a NodePort number.
 
 ## Verifying Mosquitto is Working
