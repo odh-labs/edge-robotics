@@ -46,7 +46,10 @@ The following diagram explains leader and follower.
 In short, the leader published the movement commands that it receives from the Remote Robot Control application to the 'movement' topic of a MQTT server. The follower subscribes to the 'movement' topic and executes the movements received from the MQTT server. The end result is that the follower mimics the movements of the leader.
 <br /><br />Please note that the leader does not need a follower to function. The leader can be controlled by the Remote Robot Control application without a follower.
 
-### 4.2 Supported Rover Commands
+### 4.2 Disabling MQTT, Leader and Follower
+Configuring LEADER and FOLLOWER requires use of MQTT server. There are use cases in which we do not want ot use a MQTT server. We can disable MQTT for such use cases. Once we do that, there is no more leader or follower. Te robot will only respond to the Rover RESTful API.
+
+### 4.3 Supported Rover Commands
 | Movement Command | Description |
 | ------------ | ----------- |
 | name | Assign a name to the robot. |
@@ -61,7 +64,7 @@ In short, the leader published the movement commands that it receives from the R
 | slideLeft | Make the robot move sideway to the left for a short distance and stop. |
 | slideRight | Make the robot move sideway to the right for a short distance and stop. |
 
-### 4.3 Invoking Rover Commands using a RESTful API
+### 4.4 Invoking Rover Commands using a RESTful API
 A RESTful API has been implemented using the aREST library. The RESTful API to send a robot movement command is of the form:
 <br /><br />http://{robotIP}/exec?param={cmdString}
 <br /><br />where
@@ -75,32 +78,35 @@ http://192.168.1.157/exec?param=forward
 instructs the robot to move forward
 <br /><br /> Another example:
 ~~~~
-http://192.168.1.157/exec?param=speed\&nbsp;40
+http://192.168.1.157/exec?param=speed%2040
 ~~~~
-instructs the robot to set the speed to 40% top speed. Note that 40 follows the command 'speed' and a space.
+instructs the robot to set the speed to 40% top speed. Note that 40 follows the command 'speed' and a space (URLencoded to %20).
 <br /><br />The Remote Robot Control application uses the encodeURI() function to handle special characters like 'space' by replacing it with '\&nbsp;'.
 <br />
 You may use either a GET or a POST operation with the API.
 
-### 4.4 Command Execution Behaviour
+### 4.5 Command Execution Behaviour
 It was found that if we use Arduino's delay() functions in the sketch for timing, it will make the remote control response unacceptably laggy. Instead, an event processing approach is being used. Whenever a delay is needed, an event will be put in a scheduler queue to be processed when the scheduled time arrives. Control is returned to the Arduino main loop. While a command is waiting for completion, another command can be issued resulting in the abortion of the running command and the near immediate execution of the new command.
 
-### 4.5 Configuration
+### 4.6 Configuration
 The rover.ino sketch needs to be configured to match your needs and environment.
 <br />
 1. Define if you want the robot to be the leader or follower
 ~~~~
-    define _LEADER
+    #define _MQTT
+    #define _LEADER
     //#define _FOLLOWER
 ~~~~
-Select the role by comment out the other. In this case, you want a leader.
+Select the role by comment out the other. In this case, you want a leader. Note that the _MQTT macro must be defined if you want a LEADER or a FOLLOWER.
+<br />If you comment out the _MQTT macro, whether _LEADER OR _FOLLOWER is defined makes no difference. The robot will only respond to the robot RESTful API.
+
 2. Configure the Wifi parameters
 ~~~~
     const char* ssid = "Kardinia701";
     const char* password = "myPassword";
 ~~~~
 Change the ssid and password for your Wifi connection.
-2. Configure the MQTT server parameters
+2. Configure the MQTT server parameters if you keep the _MQTT macro defined.
 ~~~~
     const char* mqttServer = "broker.hivemq.com";
     const int mqttPort = 1883;

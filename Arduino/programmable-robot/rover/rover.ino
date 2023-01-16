@@ -1,7 +1,5 @@
 #include <WiFi.h>
 #include <aREST.h>
-#include <PubSubClient.h>
-#include <ArduinoJson.h>
 
 #include "RoverC.h"
 #include "RoverCommands.h"
@@ -11,11 +9,17 @@
 // LEADER sends movement commands to a MQTT topic and never receives from the MQTT topic
 // FOLLOWER receives from a MQTT topic and never sends movement commands to the MQTT topic
 // ******************************************************************************************
-//define _LEADER
-#define _FOLLOWER
+#define _MQTT
+define _LEADER
+//#define _FOLLOWER
 // ******************************************************************************************
 
-#define MAX_MQTT_MSG_LENGTH 100
+#ifdef _MQTT
+#include <PubSubClient.h>
+#include <ArduinoJson.h>
+#endif
+
+#define MAX_MSG_LENGTH 100
 
 // Create aREST instance
 aREST rest = aREST();
@@ -24,6 +28,17 @@ aREST rest = aREST();
 const char* ssid = "Kardinia701";
 const char* password = "myPassword";
 
+
+
+// Create an instance of the server
+WiFiServer server(80);
+
+char ip[16], cmd[16], message[MAX_MSG_LENGTH + 1];
+
+RoverCommands rc = RoverCommands();
+
+#ifdef _MQTT
+
 // MQTT parameters
 const char* mqttServer = "broker.hivemq.com";
 const int mqttPort = 1883;
@@ -31,18 +46,6 @@ const char* mqttUser = "rhtest";
 const char* mqttPassword = "rhtest";
 
 const char* mqttTopic = "movement";
-
-// create the clients
-WiFiClient espClient;
-PubSubClient mqttClient(espClient);
-
-// Create an instance of the server
-WiFiServer server(80);
-
-char ip[16], cmd[16], message[MAX_MQTT_MSG_LENGTH + 1];
-
-RoverCommands rc = RoverCommands();
-
 // ******************************************************************************************
 #ifdef _LEADER
 const char* restId = "1";
@@ -57,7 +60,9 @@ const char* mqttClientName = "FOLLOW";
 
 DynamicJsonDocument doc(100);
 char jsonMsg[100];
-
+// create the clients
+WiFiClient espClient;
+PubSubClient mqttClient(espClient);
 
 // this callback function is called when a MQTT message is received
 // The payload is in json. Here is a sample:
@@ -83,6 +88,17 @@ void processMqttMsg(char* topic, byte* payload, unsigned int length) {
 }
 #endif
 // ******************************************************************************************
+
+// Send MQTT message to a specific topic
+int publishMqttMsg(char *cmd) {
+  snprintf(message, MAX_MSG_LENGTH, "{ \"id\" : \"%s\", \"cmd\" : \"%s\", \"time\" : \"%ld\" }", rc.getName(),  cmd, millis());
+  Serial.println(message);
+  return mqttClient.publish(mqttTopic, message);
+}
+#else
+const char* restId = "3";
+const char* restName = "WIFI_ROBOT";
+#endif
 
 // the setup routine runs once when M5StickC starts up
 void setup(){ 
@@ -120,6 +136,7 @@ void setup(){
   server.begin();
   Serial.println("Server started");
 
+#ifdef _MQTT
   // connect to MQTT server
   mqttClient.setServer(mqttServer, mqttPort);
   while (!mqttClient.connected()) {
@@ -145,6 +162,7 @@ void setup(){
    
       }
   }
+#endif
 
   RoverC_Init();
   lcdMessage("Rover Ready.");
@@ -152,7 +170,7 @@ void setup(){
 
 // the loop routine runs over and over again forever
 void loop() {
-  //snprintf(message, MAX_MQTT_MSG_LENGTH, "Speed: %d", rc.getSpeed());
+  //snprintf(message, MAX_MSG_LENGTH, "Speed: %d", rc.getSpeed());
   //lcdMessage(message);
 
   // Handle REST calls
@@ -165,7 +183,7 @@ void loop() {
     // check if scheduled event is due for execution
     if (! SchedulerQueue::getInstance()->getEventQueue()->isEmpty()) {
       Event event = SchedulerQueue::getInstance()->getEventQueue()->getHead();
-      snprintf(message, MAX_MQTT_MSG_LENGTH, "Process: QueueLength=%d, event.time=%ld, event.action=%d, time: %ld", 
+      snprintf(message, MAX_MSG_LENGTH, "Process: QueueLength=%d, event.time=%ld, event.action=%d, time: %ld", 
         SchedulerQueue::getInstance()->getEventQueue()->itemCount(), event.time, event.action, millis());
       Serial.println(message);
       if (millis() >= event.time) {
@@ -180,17 +198,12 @@ void loop() {
     }
   }
 
-
+#ifdef _MQTT
   // poll for MQTT message and maintain connection
   mqttClient.loop();
+#endif
 }
 
-// Send MQTT message to a specific topic
-int publishMqttMsg(char *cmd) {
-  snprintf(message, MAX_MQTT_MSG_LENGTH, "{ \"id\" : \"%s\", \"cmd\" : \"%s\", \"time\" : \"%ld\" }", rc.getName(),  cmd, millis());
-  Serial.println(message);
-  return mqttClient.publish(mqttTopic, message);
-}
 
 // display a line of text on LCD
 void lcdMessage(char *msg) {
@@ -209,6 +222,7 @@ int execCommand(String command) {
   command.toCharArray(cmd, 16);
   lcdMessage(cmd);
 
+#ifdef _MQTT
 // ******************************************************************************************
 #ifdef _LEADER
   // publish the movement command to MQTT topic
@@ -219,6 +233,7 @@ int execCommand(String command) {
   }
 #endif
 // ******************************************************************************************
+#endif
 
   return rc.execCommand(cmd);
 
@@ -229,7 +244,7 @@ void clearScheduledEvents() {
     if (! SchedulerQueue::getInstance()->getEventQueue()->isEmpty()) {
       for (int i = 0; i < SchedulerQueue::getInstance()->getEventQueue()->itemCount(); i++) {
         Event event = SchedulerQueue::getInstance()->getEventQueue()->dequeue();
-        snprintf(message, MAX_MQTT_MSG_LENGTH, "Clear: QueueLength=%d, event.time=%ld, event.action=%d, time: %ld", 
+        snprintf(message, MAX_MSG_LENGTH, "Clear: QueueLength=%d, event.time=%ld, event.action=%d, time: %ld", 
           SchedulerQueue::getInstance()->getEventQueue()->itemCount(), event.time, event.action, millis());
         Serial.println(message);
       }
