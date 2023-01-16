@@ -158,7 +158,7 @@
   // not currently used in this robot application
   int  RoverCommands::continueExecute() {
     Serial.print("ContinueCmd: ");
-    Serial.println(currentCmd);
+    Serial.println(defs[currentCmd].commandStr);
 
     // Not needed
 
@@ -170,7 +170,7 @@
   // abortion due to a new command being received
   int  RoverCommands::completeExecute() {
     Serial.print("CompleteCmd: ");
-    Serial.println(currentCmd);
+    Serial.println(defs[currentCmd].commandStr);
     Move_stop(speed);
     return 0;    
   }
