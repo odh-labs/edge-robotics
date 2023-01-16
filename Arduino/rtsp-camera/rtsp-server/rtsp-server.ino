@@ -242,7 +242,11 @@ void setup()
     }
 #else
     lcdMessage(String("join ") + ssid);
-    WiFi.mode(WIFI_STA);
+    
+    // Commented out setting the mode to WIFI_STA. It was found that, for some unknown reasons, setting it
+    // causes the app not able to connect to at least one router I tested.
+    // WiFi.mode(WIFI_STA);
+    
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED)
     {
