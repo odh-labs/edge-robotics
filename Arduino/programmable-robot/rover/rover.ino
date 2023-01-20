@@ -10,7 +10,7 @@
 // FOLLOWER receives from a MQTT topic and never sends movement commands to the MQTT topic
 // ******************************************************************************************
 #define _MQTT
-define _LEADER
+#define _LEADER
 //#define _FOLLOWER
 // ******************************************************************************************
 
