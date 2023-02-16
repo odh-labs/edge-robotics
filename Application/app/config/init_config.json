@@ -1,0 +1,52 @@
+{
+    "pipeline_config":
+    {
+        "stream_count": 1,
+        "autostart": false,
+        "database": true,
+        "tracker":"bytesort",
+        "duplicate_check":2,
+        "dbFrameCount": 24,
+        "profile":true,
+        "model_type":"openvino",
+        "stream_switch":30
+    },
+    "stream_config":[
+        {
+            "livestream": true,
+            "outStream": false,
+            "frameSkip": 2,
+            "chunk_wait": 2,
+            "chunk_size": 10,
+            "stream_fail_wait": 40,
+            "model_type":"openvino"     
+        },
+        {
+            "livestream": true,
+            "outStream": false,
+            "frameSkip": 2,
+            "chunk_wait": 3,
+            "chunk_size": 7,
+            "stream_fail_wait": 60,
+            "model_type":"openvino"    
+        },
+        {
+            "livestream": false,
+            "outStream": false,
+            "frameSkip": 2,
+            "chunk_wait": 3,
+            "chunk_size": 7,
+            "stream_fail_wait": 60,
+            "model_type":"openvino"    
+        },
+        {
+            "livestream": false,
+            "outStream": false,
+            "frameSkip": 2,
+            "chunk_wait": 3,
+            "chunk_size": 7,
+            "stream_fail_wait": 60,
+            "model_type":"openvino"   
+        }
+    ]
+}

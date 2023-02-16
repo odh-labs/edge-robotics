@@ -1,0 +1,51 @@
+# https://hub.tekton.dev/tekton/Task/argocd-task-connect-repo/0.1
+# copied to https://console-openshift-console.apps.anomaly-cluster.rqdu.p1.openshiftapps.com/k8s/ns/user2/import
+# Create 
+# 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-env-configmap
+  namespace: user2
+data:
+  ARGOCD_SERVER: argocd-server-user2.apps.anomaly-cluster.rqdu.p1.openshiftapps.com
+---
+  # choose one of username/password or auth token
+  # echo admin | base64 --> YWRtaW4K
+  # echo AzK6byTCWYDu7ELMZt1gck9sGdrHnN3O | base64  ---> QXpLNmJ5VENXWUR1N0VMTVp0MWdjazlzR2RySG5OM08K
+  # instead of 'K' at end put '='
+  # or just create the secret manually using original values.
+kind: Secret
+apiVersion: v1
+metadata:
+  name: argocd-env-secret
+  namespace: user2
+data:
+  ARGOCD_PASSWORD: QXpLNmJ5VENXWUR1N0VMTVp0MWdjazlzR2RySG5OM08=
+  ARGOCD_USERNAME: YWRtaW4=
+type: Opaque
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: argocd-pipeline-test
+  namespace: user2
+spec:
+  tasks:
+    - name: connect-repo
+      taskRef:
+        name: argocd-task-connect-repo
+      params:
+        - name: repository-url
+          value: https://charts.bitnami.com/bitnami
+        - name: repository-type
+          value: helm
+        - name: repository-name
+          value: concourse
+        - name: flags
+          value: --insecure
+
+
+# argocd login "argocd-server-user2.apps.anomaly-cluster.rqdu.p1.openshiftapps.com" --username="YWRtaW4K" --password="QXpLNmJ5VENXWUR1N0VMTVp0MWdjazlzR2RySG5OM08=";
+
+# argocd login "argocd-server-user2.apps.anomaly-cluster.rqdu.p1.openshiftapps.com" --username="admin" --password="AzK6byTCWYDu7ELMZt1gck9sGdrHnN3O"

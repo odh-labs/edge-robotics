@@ -1,0 +1,5 @@
+2023-01-16 18:22:08,987 Loaded Pipeline
+2023-01-16 18:23:30,367 >>> Stopping Run
+2023-01-16 18:23:31,661 =================Timing Stats=================
+2023-01-16 18:23:31,661 'NoneType' object has no attribute 'count'
+2023-01-16 18:23:31,670 >>> Starting Run

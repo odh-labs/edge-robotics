@@ -1,0 +1,18 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: guiseai
+  labels:
+    app: guiseai
+    service: guiseai
+spec:
+  ports:
+    - name: 30000-tcp
+      port: 30000
+      protocol: TCP
+      targetPort: 30000
+  type: ClusterIP
+  selector:
+     app: guiseai
+  sessionAffinity: None

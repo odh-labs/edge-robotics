@@ -1,0 +1,1 @@
+from .inference_yolov5 import YOLOV5_s

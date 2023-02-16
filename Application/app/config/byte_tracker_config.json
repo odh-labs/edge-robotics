@@ -1,0 +1,10 @@
+{
+    "conf":"",
+    "nms":"",
+    "track_thresh":0.5,
+    "track_buffer":40,
+    "match_thresh":0.8,
+    "aspect_ratio_thresh":1.6,
+    "min_box_area":10,
+    "mot20":false
+}

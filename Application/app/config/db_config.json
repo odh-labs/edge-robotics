@@ -1,0 +1,6 @@
+{
+    "apiKey": "AIzaSyDF_VQGI1-GX0m1mf4vuBRClWTRZHNvBz4",
+    "authDomain": "anpr-internal.firebaseapp.com",
+    "databaseURL": "https://anpr-internal-default-rtdb.firebaseio.com",
+    "storageBucket": "anpr-internal.appspot.com"
+}

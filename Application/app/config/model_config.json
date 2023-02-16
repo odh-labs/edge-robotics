@@ -1,0 +1,14 @@
+{
+  "robot": {
+    "conf_thres": 0.5,
+    "input_h": 640,
+    "input_w": 640,
+    "iou_thres": 0.4,
+    "model_base_path": "weights/openvino/robot",
+    "model_input_size": "640",
+    "names": ["Robot-R","Robot-B"],
+    "num_classes": 2,
+    "precision": "fp16",
+    "throughput": true
+  }
+}

@@ -1,0 +1,60 @@
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    openshift.io/host.generated: "true"
+  labels:
+    app: guiseai
+    app.kubernetes.io/instance: guiseai
+    service: guiseai
+  name: guiseai
+spec:
+  port:
+    targetPort: 30000-tcp
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: guiseai
+    weight: 100
+  wildcardPolicy: None
+
+
+
+# apiVersion: route.openshift.io/v1
+# kind: Route
+# metadata:
+#   annotations:
+#     openshift.io/host.generated: "true"
+#   creationTimestamp: "2023-01-19T02:36:52Z"
+#   labels:
+#     app: guiseai
+#     app.kubernetes.io/instance: argo-guise
+#     service: guiseai
+#   name: guise-route
+#   namespace: user2
+#   resourceVersion: "195833242"
+#   uid: ec1496e4-5830-45da-b902-03c2927c0285
+# spec:
+#   host: guise-route-user2.apps.anomaly-cluster.rqdu.p1.openshiftapps.com
+#   port:
+#     targetPort: 30000-tcp
+#   to:
+#     kind: Service
+#     name: guiseai
+#     weight: 100
+#   wildcardPolicy: None
+# status:
+#   ingress:
+#   - conditions:
+#     - lastTransitionTime: "2023-01-19T02:36:52Z"
+#       status: "True"
+#       type: Admitted
+#     host: guise-route-user2.apps.anomaly-cluster.rqdu.p1.openshiftapps.com
+#     routerCanonicalHostname: router-default.apps.anomaly-cluster.rqdu.p1.openshiftapps.com
+#     routerName: default
+#     wildcardPolicy: None
+
+  

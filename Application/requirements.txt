@@ -1,0 +1,10 @@
+numpy
+opencv-python==4.6.0.66
+scipy==1.5.4
+gevent
+flask==2.0.3
+flask-cors==3.0.10
+flask-jsglue==0.3.1
+python-decouple
+PyYAML
+Jinja2==3.0.3
