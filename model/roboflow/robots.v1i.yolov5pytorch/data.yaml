@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 2
+names: ['B-Robot', 'R-Robot']
+
+roboflow:
+  workspace: project
+  project: robots-fy7na
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/project/robots-fy7na/dataset/1
