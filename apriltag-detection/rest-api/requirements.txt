@@ -1,0 +1,4 @@
+flask
+apriltag
+opencv-python
+numpy
