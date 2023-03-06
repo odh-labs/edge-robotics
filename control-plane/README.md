@@ -5,6 +5,8 @@ Quickest Setup:
 - Setup MicroShift on AWS.EC2.
 - AMI: MicroShift needs LVM (Logical Volume Manager) hence best to search for AMI via 'Red Hat 8 LVM'
 - example AMI: aws-marketplace/ProComputers RHEL-8.7-x86_64-LVM-10GiB-HVM-20221220_052520-3686aad7-f1c3-4f97-9872-a6f8176d0f60
-- then run setup script: https://access.redhat.com/documentation/en-us/red_hat_build_of_microshift/4.12/html/installing/microshift-install-rpm
+- use security group with SSH (your IP) and HTTP/TCP traffic - inbound traffic source IP depends on your use case
+- then follow instructions at: https://access.redhat.com/documentation/en-us/red_hat_build_of_microshift/4.12/html/installing/microshift-install-rpm
+- or use microshift_setup.sh
 
 
