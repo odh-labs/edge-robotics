@@ -1,0 +1,10 @@
+MicroShift managed by ACM
+-- status: WIP
+Quickest Setup: 
+- Provision ACM Hub cluster via Red Hat Demo System
+- Setup MicroShift on AWS.EC2.
+- AMI: MicroShift needs LVM (Logical Volume Manager) hence best to search for AMI via 'Red Hat 8 LVM'
+- example AMI: aws-marketplace/ProComputers RHEL-8.7-x86_64-LVM-10GiB-HVM-20221220_052520-3686aad7-f1c3-4f97-9872-a6f8176d0f60
+- then run setup script: https://access.redhat.com/documentation/en-us/red_hat_build_of_microshift/4.12/html/installing/microshift-install-rpm
+
+
