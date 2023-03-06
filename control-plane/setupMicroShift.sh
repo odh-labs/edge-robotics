@@ -5,11 +5,12 @@ sudo vgs
 echo '### \n setup subscription manager - provide username / password'
 sudo subscription-manager register
 
-echo '# enable repos'
+echo '# enabling repos'
 sudo subscription-manager repos \
 --enable rhocp-4.12-for-rhel-8-$(uname -i)-rpms \
 --enable fast-datapath-for-rhel-8-$(uname -i)-rpms
 
+echo '### installing microshift'
 sudo dnf install -y microshift
 
 echo '### prepare pull secret from https://console.redhat.com/openshift/install/pull-secret'
@@ -32,6 +33,9 @@ sudo systemctl start microshift
 
 echo '### enable MicroShift'
 sudo systemctl enable microshift
+
+echo '### installing client tooling'
+sudo dnf install openshift-clients
 
 echo '### setting up cluster access'
 mkdir -p ~/.kube/
