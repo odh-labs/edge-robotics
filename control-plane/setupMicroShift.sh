@@ -27,19 +27,25 @@ check_exit_code()
 }
 
 
-
-echo -n "Provide Red Hat Username:"
+echo -n "Provide path to pull-secret eg. $HOME/openshift-pullsecret: "
+read path2pullsecret
+echo -n "Provide Red Hat Username: "
 read username
 echo "Red Hat Username: $username"
-echo -n "Provide Red Hat Password:"
+echo -n "Provide Red Hat Password: "
 read -s password
 
 #debug
 #echo "password provided: $password"
 
-echo '### prepare pull secret from https://console.redhat.com/openshift/install/pull-secret'
-read -p "Press Enter when you done copying your pull secret to $HOME/openshift-pull-secret" </dev/tty
-check_exit_code $?
+if [ -z "$username" ]
+    then
+        echo '###'
+        echo "usage installMicroShift.sh redhat_username"
+        echo '###'
+        #check_exit_code $?
+        exit
+fi
 
 echo '###ensure that vgs (volume groups) displays volume groups with storage available > 10Gb'
 sudo vgs
@@ -61,8 +67,8 @@ echo '### installing microshift'
 sudo dnf install -y microshift
 check_exit_code $?
 
-echo '### copy pull secret from $HOME/openshift-pull-secret to /etc/crio'
-sudo cp $HOME/openshift-pull-secret /etc/crio/openshift-pull-secret
+echo '### copy pull secret from path2pullsecret to /etc/crio'
+sudo cp $path2pullsecret /etc/crio/openshift-pull-secret
 check_exit_code $?
 
 echo '### ensuring root user is owner of the pull-secret'
