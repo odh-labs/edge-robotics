@@ -37,17 +37,6 @@ read -s password
 #debug
 #echo "password provided: $password"
 
-if [ -z "$username" ]
-    then
-        echo '###'
-        echo "usage installMicroShift.sh redhat_username"
-        echo '###'
-        #check_exit_code $?
-        exit
-fi
-
-
-
 echo '### prepare pull secret from https://console.redhat.com/openshift/install/pull-secret'
 read -p "Press Enter when you done copying your pull secret to $HOME/openshift-pull-secret" </dev/tty
 check_exit_code $?
