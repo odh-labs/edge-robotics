@@ -1,4 +1,5 @@
 
+# Steps taken from: https://access.redhat.com/documentation/en-us/red_hat_build_of_microshift/4.12/html-single/installing/index
 # This script is based on a RHEL8.7 instance with lvm storage management. For example you can use:
 # AMI ID: ami-040eb61173ba40e89
 # Platform details: Red Hat Enterprise Linux
