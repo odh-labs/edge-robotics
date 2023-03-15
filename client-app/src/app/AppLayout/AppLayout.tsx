@@ -8,7 +8,7 @@ import {
   Page,
   PageHeader,
   PageSidebar,
-  SkipToContent
+  SkipToContent,
 } from '@patternfly/react-core';
 import { routes, IAppRoute, IAppRouteGroup } from '@app/routes';
 import logo from '@app/bgimages/Patternfly-Logo.svg';
@@ -36,9 +36,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     function handleClick() {
       history.push('/');
     }
-    return (
-      <img src={logo} onClick={handleClick} alt="PatternFly Logo" />
-    );
+    return <img src={logo} onClick={handleClick} alt="PatternFly Logo" />;
   }
 
   const Header = (
@@ -81,21 +79,19 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     </Nav>
   );
 
-  const Sidebar = (
-    <PageSidebar
-      theme="dark"
-      nav={Navigation}
-      isNavOpen={isMobileView ? isNavOpenMobile : isNavOpen} />
-  );
+  const Sidebar = <PageSidebar theme="dark" nav={Navigation} isNavOpen={isMobileView ? isNavOpenMobile : isNavOpen} />;
 
   const pageId = 'primary-app-container';
 
   const PageSkipToContent = (
-    <SkipToContent onClick={(event) => {
-      event.preventDefault();
-      const primaryContentContainer = document.getElementById(pageId);
-      primaryContentContainer && primaryContentContainer.focus();
-    }} href={`#${pageId}`}>
+    <SkipToContent
+      onClick={(event) => {
+        event.preventDefault();
+        const primaryContentContainer = document.getElementById(pageId);
+        primaryContentContainer && primaryContentContainer.focus();
+      }}
+      href={`#${pageId}`}
+    >
       Skip to Content
     </SkipToContent>
   );
@@ -105,7 +101,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       header={Header}
       sidebar={Sidebar}
       onPageResize={onPageResize}
-      skipToContent={PageSkipToContent}>
+      skipToContent={PageSkipToContent}
+    >
       {children}
     </Page>
   );
