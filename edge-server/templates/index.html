@@ -26,7 +26,7 @@
             socket.addEventListener('message', ev => {
                 msg = JSON.parse(ev.data);
                 document.getElementById('events').innerHTML =  msg['text'] + "\n" + 
-                    document.getElementById('events').innerHTML;
+                    document.getElementById('events').innerHTML.substr(0, 800);
             });
     
         </script>
