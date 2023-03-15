@@ -1,6 +1,3 @@
 flask
-apriltag
 opencv-python
-numpy
 flask_sock
-Flask-Session
