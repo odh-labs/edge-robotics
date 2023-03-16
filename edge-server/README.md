@@ -1,6 +1,6 @@
 # Under Construction
 
-***All files in this folder areis subject to minor/major changes.***
+***All files in this folder are subject to minor/major changes.***
 
 ## 1. Prerequisites to run Demo:
 1. A RTSP server streaming video as input
