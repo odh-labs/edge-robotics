@@ -61,7 +61,8 @@ def generateFrames(ws):
         robots["R-Robot"] = RobotTracker("R-Robot", State.OUT_OF_VIEW)
         detect = YoloObjectDetection(args.INFERENCE_API_URL, "image")
     else:
-         raise Exception("Unsupported detection method: " + args.DETECTION)
+        msg = "Unsupported detection method: " + args.DETECTION
+        raise Exception(msg)
 
     # set up external services
       
