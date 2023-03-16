@@ -21,7 +21,7 @@ class ApriltagObjectDetection(AbstractObjectDetection):
             # top left-hand corner
             corner = r['corners'][0]
 
-            row.append(r['tag_id'])
+            row.append("robot-{}".format(r['tag_id']))
             row.append(corner)
             row.append(center)
             row.append(float(r['decision_margin']))
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     detect = ApriltagObjectDetection("http://localhost:6000/v1/object-detection/apriltag", "image")         
     detect.invokeModel("apriltagSample.jpg")
     for r in detect.getNameCenterAndConfidence():
-        (name, center, corner, confidence) = r
+        (name, corner, center, confidence) = r
         print(name)
         print(center)
         print(corner)

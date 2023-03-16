@@ -36,7 +36,7 @@ if __name__ == '__main__':
     detect = YoloObjectDetection("http://127.0.0.1:5000/v1/object-detection/yolov5", "image")         
     detect.invokeModel("yoloSample.jpg")
     for r in detect.getNameCenterAndConfidence():
-        (name, center, corner, confidence) = r
+        (name, corner, center, confidence) = r
         print(name)
         print(center)
         print(corner)
