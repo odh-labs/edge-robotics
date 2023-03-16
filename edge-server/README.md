@@ -1,6 +1,6 @@
 # Under Construction
 
-***All files in this folder areis subject to minor/major changes.***
+***All files in this folder are subject to minor/major changes.***
 
 ## 1. Prerequisites to run Demo:
 1. A RTSP server streaming video as input
@@ -18,9 +18,9 @@
 Getting help:
 ~~~~
 python trackRobotsApp.py --help
-usage: trackRobotsApp.py [-h] 
-[--port PORT] [--RTSP_URL RTSP_URL]
-[--INFERENCE_API_URL INFERENCE_API_URL]
+usage: trackRobotsApp.py [-h] [--port PORT] [--RTSP_URL RTSP_URL]
+                         [--INFERENCE_API_URL INFERENCE_API_URL]
+                         [--DETECTION DETECTION]
 
 Flask api exposing robot tracking video and metadata
 
@@ -30,6 +30,9 @@ options:
   --RTSP_URL RTSP_URL   eg, rtsp://localhost:8554/mystream
   --INFERENCE_API_URL INFERENCE_API_URL
                         eg, http://127.0.0.1:5000/v1/object-detection/yolov5
+  --DETECTION DETECTION
+                        eg, Yolo or Apriltag
+
 ~~~~
 Example:
 ~~~~
@@ -39,5 +42,6 @@ using default options is equivalent to:
 
 python trackRobotsApp.py --port 5005 \
 --INFERENCE_API_URL http://localhost:5000/v1/object-detection/yolov5 \
---RTSP_URL  rtsp://localhost:8554/mystream
+--RTSP_URL  rtsp://localhost:8554/mystream \
+--DETECTION Yolo
 ~~~~

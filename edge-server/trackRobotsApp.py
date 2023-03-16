@@ -4,16 +4,32 @@ import json
 import time
 import argparse
 import datetime
+import uuid
+import os
+import glob
 from RobotTracker import RobotTracker, State
 from flask import Flask, render_template, request, Response
 from flask_sock import Sock
 from collections import deque
+from YoloObjectDetection import YoloObjectDetection
+from ApriltagObjectDetection import ApriltagObjectDetection
 
 app = Flask(__name__)
 
 sock = Sock(app)
 wsQueue = deque()
+tmpFolder = "video_frame"
 
+def doHousekeeping():
+    # check if folder exists
+    if os.path.exists(tmpFolder):
+        # remove tmp files
+        files = glob.glob(tmpFolder +"/*.jpg")
+        for f in files:
+            os.remove(f)
+    else:
+        # create folder
+        os.makedirs(tmpFolder)
 
 # draw stats on image
 def drawStats(robot, image, y):
@@ -35,10 +51,24 @@ def generateFrames(ws):
 
     # set up RobotTrackers
     robots = {}
-    robots['B-Robot'] = RobotTracker("B-Robot", State.OUT_OF_VIEW)
-    robots['R-Robot'] = RobotTracker("R-Robot", State.OUT_OF_VIEW)
+    detect = None
+    if args.DETECTION == "Apriltag":
+        robots["Robot-0"] = RobotTracker("Robot-0", State.OUT_OF_VIEW)
+        robots["Robot-1"] = RobotTracker("Robot-1", State.OUT_OF_VIEW)
+        detect = ApriltagObjectDetection(args.INFERENCE_API_URL, "image")
+    elif args.DETECTION == "Yolo":
+        robots["B-Robot"] = RobotTracker("B-Robot", State.OUT_OF_VIEW)
+        robots["R-Robot"] = RobotTracker("R-Robot", State.OUT_OF_VIEW)
+        detect = YoloObjectDetection(args.INFERENCE_API_URL, "image")
+    else:
+        msg = "Unsupported detection method: " + args.DETECTION
+        raise Exception(msg)
 
+    # set up external services
+      
     vcap = cv2.VideoCapture(args.RTSP_URL)
+    # save copy of the frame for later use
+    filename = "video_frame/" + uuid.uuid4().hex + ".jpg"
     while True:
         # Capture a frame for processing
         success, frame = vcap.read()
@@ -48,52 +78,37 @@ def generateFrames(ws):
 
             rowCall = {}
 
-            # save copy of the frame for later use
             image = frame.copy()
-            cv2.imwrite("photo1.jpg", frame)
+            cv2.imwrite(filename, frame)
 
             eventList = []
 
             # call inference REST API
-            response = requests.post(
-                args.INFERENCE_API_URL,
-                files={'image': open('photo1.jpg', 'rb')},
-            )
+            detect.invokeModel(filename)
+            # os.remove(filename)
+            count = 0
+            for d in detect.getNameCenterAndConfidence():
 
-            # process returned JSON for each robot
-            info = response.json()
-            for d in info:
-
-                r = json.loads(json.dumps(d))
-                # print(r)
-
-                if float(r['confidence']) < .6:
+                (name, corner, center, confidence) = d
+                if float(confidence) < .6:
                     continue
-                
-                name = r['name']
+
                 if name in robots:
+                    count += 1
                     rowCall[name] = 1
 
-                    # locate center of the robot
-                    x = int(r['xmin']) + (int(r['xmax'] - r['xmin'])) / 2
-                    y = int(r['ymin']) + (int(r['ymax'] - r['ymin'] ))/ 2
-                    # text = "Name={name}, Center({x}, {y})".format(name = name, x = x, y = y)
-                    # print(text)
-
                     # draw center of detected robot in saved image
-                    (cx, cy) = (int(x), int(y))
-                    cv2.circle(image, (cx, cy), 4, (0, 0, 255), -1)
+                    cv2.circle(image, center, 4, (0, 0, 255), -1)
 
                     # draw robot name and confidence level in saved image
-                    nameStr =("Id: {}  {:.3f}".format(name, r['confidence']))
-                    ptA = (int(r['xmin']), int(r['ymin']))
-                    cv2.putText(image, nameStr, (ptA[0], max(10, ptA[1] - 5)),
+                    nameStr =("Id: {}  {:.3f}".format(name, confidence))
+                    cv2.putText(image, nameStr, (corner[0], max(10, corner[1] - 5)),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
                     # print("Id: {}".format(name))
 
                     # update robot state
                     curRobot = robots.get(name)
-                    if curRobot.updateStateTrackingCenter(cx, cy):
+                    if curRobot.updateStateTrackingCenter(center[0], center[1]):
                         msg = "{}: {} at {}".format(datetime.datetime.now().strftime("%H:%M:%S"),
                                 name, curRobot.getState()
                                 )
@@ -137,10 +152,11 @@ def generateFrames(ws):
                 frCount = 0
 
             # draw state info near top left-hand corner on image
-            y = 15
-            for key in robots.keys():
-                drawStats(robots[key], image, y)
-                y += 36
+            if count != 0:
+                y = 15
+                for key in robots.keys():
+                    drawStats(robots[key], image, y)
+                    y += 36
 
             # display FPS near top right-hand corner
             cv2.putText(image, fps, (image.shape[1] - 120, 70), 
@@ -194,15 +210,21 @@ def events(ws):
 
 
 if __name__ == '__main__':
+
+    doHousekeeping()
+
     # process command line options
     parser = argparse.ArgumentParser(description="Flask api exposing robot tracking video and metadata")
     parser.add_argument("--port", default=5005, type=int, help="eg, port 5005")
-    parser.add_argument("--RTSP_URL", dest='RTSP_URL', 
-        default='rtsp://localhost:8554/mystream',
-        action='store', help="eg, rtsp://localhost:8554/mystream")
-    parser.add_argument("--INFERENCE_API_URL", dest='INFERENCE_API_URL', 
-        default='http://127.0.0.1:5000/v1/object-detection/yolov5',
-        action='store', help="eg, http://127.0.0.1:5000/v1/object-detection/yolov5")
+    parser.add_argument("--RTSP_URL", 
+        default="rtsp://localhost:8554/mystream",
+        help="eg, rtsp://localhost:8554/mystream")
+    parser.add_argument("--INFERENCE_API_URL" ,
+        default="http://127.0.0.1:5000/v1/object-detection/yolov5",
+        help="eg, http://127.0.0.1:5000/v1/object-detection/yolov5")
+    parser.add_argument("--DETECTION", 
+        default="Yolo",
+        help="eg, Yolo or Apriltag")
     args = parser.parse_args()
 
     app.run(host="0.0.0.0", port=args.port)
