@@ -1,3 +1,4 @@
 flask
 opencv-python
 flask_sock
+requests
