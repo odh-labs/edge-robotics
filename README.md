@@ -13,3 +13,4 @@ rstp-camera: the sketch to make our chosen camera into a RTSP server for streami
 - [mosquitto-running-on-microshift](https://github.com/odh-labs/edge-robotics/tree/main/mosquitto-running-on-microshift) - documented procedure for installing MicroShift on bare-metal and provided an image for deploying the Eclipse Mosquitto MQTT server with the proper configuration on quay.io together with a description on deploying it on MicroShift using the provided deplyment.yaml file.
 - [remote-robot-control](https://github.com/odh-labs/edge-robotics/tree/main/remote-robot-control) - a web-based remote robot control Javascript application for controlling the robot using the robot's RESTful API.
 - [model](https://github.com/odh-labs/edge-robotics/tree/main/model) - wrap the trained model in flask api and deploy it on openshift
+- [Application](https://github.com/odh-labs/edge-robotics/tree/main/Application) - Deploys the model+UI provided by guiseAI to Openshift using a Dockerfile
