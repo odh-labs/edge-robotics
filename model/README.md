@@ -11,9 +11,17 @@ Wraps the yolo model in flask api and deploys it on openshift via Dockerfile
 
 
 # How to use
-1. Copy yolov5.pt model into the directory
-2. Deploy on Openshift by pointing to the Dockerfile 
-3. Model will be exposed at https://`<cluster-url`>/v1/object-detection/yolov5
+1. Copy yolov5.pt model into the directory and push to git 
+   > Skip this step if you want to use the yolov5.pt provided in the directory already
+2. Login to Openshift
+3. In Developer preview click `+Add`
+4. Select `Import from Git`
+   1. Git Repo URL: https://github.com/odh-labs/edge-robotics/tree/main/model
+   2. Import Strategy: `Dockerfile`
+      1. Dockerfile path: `model/Dockerfile`
+   3. Target port: `5000`
+   4. Create 
+5. Model will be exposed at https://`<cluster-url`>/v1/object-detection/yolov5
 
 
 
