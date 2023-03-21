@@ -1,0 +1,4 @@
+{
+  "eslint.workingDirectories": ["./client-app"],
+  "typescript.tsdk": "./client-app/node_modules/typescript/lib"
+}
