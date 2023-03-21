@@ -11,7 +11,8 @@ Wraps the yolo model in flask api and deploys it on openshift via Dockerfile
 
 
 # How to use
-1. Copy yolov5.pt model into the directory and push to git (Skip this step if you want to use the yolov5.pt provided in the directory already)
+1. Copy yolov5.pt model into the directory and push to git 
+   > Skip this step if you want to use the yolov5.pt provided in the directory already
 2. Login to Openshift
 3. In Developer preview click `+Add`
 4. Select `Import from Git`
