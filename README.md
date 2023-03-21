@@ -14,3 +14,4 @@ rstp-camera: the sketch to make our chosen camera into a RTSP server for streami
 - [remote-robot-control](https://github.com/odh-labs/edge-robotics/tree/main/remote-robot-control) - a web-based remote robot control Javascript application for controlling the robot using the robot's RESTful API.
 - [model](https://github.com/odh-labs/edge-robotics/tree/main/model) - wrap the trained model in flask api and deploy it on openshift
 - [Application](https://github.com/odh-labs/edge-robotics/tree/main/Application) - Deploys the model+UI provided by guiseAI to Openshift using a Dockerfile
+- [Edge Hardware](https://github.com/odh-labs/edge-robotics/tree/main/edge-hardware) - Sets up bare metal edge devices via FDO and PXE Boot
