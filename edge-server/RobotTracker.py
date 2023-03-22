@@ -7,6 +7,7 @@ class State(Enum):
     OUT_OF_VIEW = 2
     STOPPED = 3
     MOVING = 4
+    UNKNOWN = 5
 
 class RobotTracker:
     # threshold for movement in number of pixels

@@ -53,12 +53,12 @@ def generateFrames(ws):
     robots = {}
     detect = None
     if args.DETECTION == "Apriltag":
-        robots["Robot-0"] = RobotTracker("Robot-0", State.OUT_OF_VIEW)
-        robots["Robot-1"] = RobotTracker("Robot-1", State.OUT_OF_VIEW)
+        robots["Robot-0"] = RobotTracker("Robot-0", State.UNKNOWN)
+        robots["Robot-1"] = RobotTracker("Robot-1", State.UNKNOWN)
         detect = ApriltagObjectDetection(args.INFERENCE_API_URL, "image")
     elif args.DETECTION == "Yolo":
-        robots["B-Robot"] = RobotTracker("B-Robot", State.OUT_OF_VIEW)
-        robots["R-Robot"] = RobotTracker("R-Robot", State.OUT_OF_VIEW)
+        robots["B-Robot"] = RobotTracker("B-Robot", State.UNKNOWN)
+        robots["R-Robot"] = RobotTracker("R-Robot", State.UNKNOWN)
         detect = YoloObjectDetection(args.INFERENCE_API_URL, "image")
     else:
         msg = "Unsupported detection method: " + args.DETECTION
