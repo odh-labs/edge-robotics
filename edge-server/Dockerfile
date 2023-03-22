@@ -1,6 +1,10 @@
-FROM docker.io/library/python:3.8-slim
+FROM registry.fedoraproject.org/fedora:36
 
-RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
+RUN dnf install -y \
+https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-36.noarch.rpm \
+https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-36.noarch.rpm
+
+RUN dnf install  -y ffmpeg python3 python3-pip && ln -s /usr/bin/python3 /usr/bin/python
 
 WORKDIR /app
 
