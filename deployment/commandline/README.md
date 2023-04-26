@@ -13,7 +13,7 @@ OpenShift:
 ffmpeg -re -stream_loop -1 -r 15 -i $FILE -c copy -f rtsp rtsp://openshift-host-ip:30854/mystream
 
 MicroShift:
-ffmpeg -re -stream_loop -1 -i $FILE -c copy -f rtsp rtsp://192.168.130.11:30854/mystream
+ffmpeg -re -stream_loop -1 -i $FILE -c copy -f rtsp rtsp://microshift-host-ip:30854/mystream
 
 To invoke the annotated video with events, point you browser to:
 http://host-ip:30505
