@@ -28,9 +28,8 @@ def predict():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Flask api exposing yolov5 model")
     parser.add_argument("--port", default=5000, type=int, help="port 5000")
-    parser.add_argument('--model', default='yolov5s', help='model to run, i.e. --model yolov5s')
+    parser.add_argument('--model', default='/app/yolov5s', help='model to run, i.e. --model yolov5s')
     args = parser.parse_args()
 
-    model = torch.hub.load('ultralytics/yolov5', args.model)
-   # model = torch.hub.load(os.getcwd(), 'custom', source='local', path = args.model, force_reload = True)
+    model = torch.hub.load('/app/ultralytics_yolov5_master', 'custom', source='local', path = args.model, force_reload = True)
     app.run(host="0.0.0.0", port=args.port)  # debug=True causes Restarting with stat

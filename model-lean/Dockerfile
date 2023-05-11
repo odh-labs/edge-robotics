@@ -1,7 +1,12 @@
-#FROM docker.io/library/python:3.8-slim-buster
-FROM docker.io/library/python:3.8-slim
+FROM registry.fedoraproject.org/fedora:38
 
-RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
+RUN dnf install -y \
+https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-38.noarch.rpm \
+https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-38.noarch.rpm
+
+RUN dnf update -y && \
+dnf install -y ffmpeg python3-pip && \
+ln -s /usr/bin/python3 /usr/bin/python 
 
 WORKDIR /app
 
@@ -16,4 +21,4 @@ RUN chgrp -R 0 /app && chmod -R g=u /app
 # Expose the port
 EXPOSE 5000
 
-CMD ./run.sh
+CMD ["python", "backend.py"]
