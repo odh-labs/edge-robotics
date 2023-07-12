@@ -1,0 +1,71 @@
+# Setup and configure our environment as a RHEL based
+# microshift environment
+#
+# Execution
+#  ansible-playbook  -i ./hosts ./microshift.yaml
+# 
+# Requires
+#  secrets.yaml with Red Hat Activation Key
+#
+---
+- hosts: microshift
+  become: True
+  become_user: root
+  vars_files:
+    #- ./vars/common.yml
+    #- ./vars/{{ redpill_region }}.yaml
+    - ./secrets.yaml
+  tasks:
+
+  - name: Enable Red Hat Subscription if we're on RHEL
+    include_role: name=register-rhel-subscription
+    when: 
+      - rh_org_activationkey is defined
+      - ansible_facts['distribution'] == "RedHat"
+
+  - name: Enable all repositories required for microshift
+    community.general.rhsm_repository:
+      name: "{{item}}"
+      state: enabled
+    with_items:
+     - 'rhocp-4.13-for-rhel-9-x86_64-rpms'
+     - 'fast-datapath-for-rhel-9-x86_64-rpms'
+
+  - name: Install the microshif dependencies
+    yum:
+      name: ['microshift', 'microshift-greenboot' ]
+      state: present
+
+  - name: Enable Firewalld
+    systemd:
+      name: firewalld
+      state: started
+      enabled: yes
+      masked: no
+
+  - name: Firewalld rules for our microshift zones
+    firewalld:
+      zone: "trusted"
+      source: "{{item}}"
+      immediate: true
+      permanent: true
+      state: enabled
+    with_items:
+     - '10.42.0.0/16'
+     - '169.254.169.1'
+
+  - name: Allow external access to the microshift API on 6443
+    firewalld:
+      zone: "public"
+      port: "6443/tcp"
+      immediate: true
+      permanent: true
+      state: enabled
+
+  - name: Copy our OpenShift Pull secret
+    copy:
+      src: openshift-pull-secret
+      dest: /etc/crio/openshift-pull-secret
+      owner: root
+      group: root
+      mode: 0600
