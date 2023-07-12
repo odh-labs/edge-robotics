@@ -2,7 +2,8 @@ VMNAME=microshift-starter4.13
 DVDISO=/var/lib/libvirt/images/rhel-9.2-$(uname -m)-dvd.iso
 KICKSTART=https://raw.githubusercontent.com/odh-labs/edge-robotics/main/edge-hardware/MicroShift/uShift4.13/MicroShift4.13-start.ks
 
-sudo -b bash -c " \
+#sudo -b bash -c " \
+sudo -s \
 cd /var/lib/libvirt/images && \
 virt-install \
     --name ${VMNAME} \
@@ -14,5 +15,6 @@ virt-install \
     --location ${DVDISO} \
     --extra-args \"inst.ks=${KICKSTART}\" \
     --noautoconsole \
-    --wait \
-"
+    --debug \
+    --wait #\
+#"
