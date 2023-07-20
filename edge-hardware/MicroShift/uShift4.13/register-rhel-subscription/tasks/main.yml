@@ -1,0 +1,16 @@
+---
+# Code based on
+#  - https://www.redhat.com/sysadmin/register-rhel-attach-subscription-ansible
+# tasks file for register-rhel-subscription
+#
+#  This additional line is useful if we want to reset the hostname
+#  used for subscription manager connections
+#   server_hostname: "subscription.rhsm.redhat.com"
+#
+# Register System and add Subcription
+- name: Register system and add subscription
+  redhat_subscription:
+    activationkey: "{{ rh_org_activationkey }}"
+    org_id: "{{ rh_org_id }}"
+    consumer_name: "{{inventory_hostname}}"
+    state: present

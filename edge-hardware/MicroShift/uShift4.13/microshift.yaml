@@ -69,3 +69,17 @@
       owner: root
       group: root
       mode: 0600
+
+  - name: Start & enable microshift
+    ansible.builtin.service:
+      name: microshift.service
+      enabled: true
+      state: started
+
+  - name: create directory for kubeconfig
+    file: 
+      path: /home/redhat/.kube
+      state: directory
+
+  - name: Create kubeconfig in /home/redhat/.kube/config
+    ansible.builtin.shell: sudo cat /var/lib/microshift/resources/kubeadmin/kubeconfig > /home/redhat/.kube/config
