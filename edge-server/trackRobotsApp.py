@@ -2,11 +2,11 @@ import cv2
 import requests
 import json
 import time
-import argparse
 import datetime
-import uuid
+#import uuid
 import os
 import glob
+import configparser
 from RobotTracker import RobotTracker, State
 from flask import Flask, render_template, request, Response
 from flask_sock import Sock
@@ -20,16 +20,16 @@ sock = Sock(app)
 wsQueue = deque()
 tmpFolder = "video_frame"
 
-def doHousekeeping():
-    # check if folder exists
-    if os.path.exists(tmpFolder):
-        # remove tmp files
-        files = glob.glob(tmpFolder +"/*.jpg")
-        for f in files:
-            os.remove(f)
-    else:
-        # create folder
-        os.makedirs(tmpFolder)
+# def doHousekeeping():
+#     # check if folder exists
+#     if os.path.exists(tmpFolder):
+#         # remove tmp files
+#         files = glob.glob(tmpFolder +"/*.jpg")
+#         for f in files:
+#             os.remove(f)
+#     else:
+#         # create folder
+#         os.makedirs(tmpFolder)
 
 # draw stats on image
 def drawStats(robot, image, y):
@@ -52,39 +52,48 @@ def generateFrames(ws):
     # set up RobotTrackers
     robots = {}
     detect = None
-    if args.DETECTION == "Apriltag":
+    if detection == "Apriltag":
         robots["Robot-0"] = RobotTracker("Robot-0", State.UNKNOWN)
         robots["Robot-1"] = RobotTracker("Robot-1", State.UNKNOWN)
-        detect = ApriltagObjectDetection(args.INFERENCE_API_URL, "image")
-    elif args.DETECTION == "Yolo":
+        detect = ApriltagObjectDetection(apriltag_url, "image")
+    elif detection == "Yolov5":
         robots["B-Robot"] = RobotTracker("B-Robot", State.UNKNOWN)
         robots["R-Robot"] = RobotTracker("R-Robot", State.UNKNOWN)
-        detect = YoloObjectDetection(args.INFERENCE_API_URL, "image")
+        detect = YoloObjectDetection(yolov5_url, "image")
     else:
-        msg = "Unsupported detection method: " + args.DETECTION
+        msg = "Unsupported detection method: " + detection
         raise Exception(msg)
 
     # set up external services
       
-    vcap = cv2.VideoCapture(args.RTSP_URL)
+    vcap = cv2.VideoCapture(rtsp_url)
+    fps = vcap.get(cv2.CAP_PROP_FPS)
+    skipCount = int(fps / float(target_fps))
+
     # save copy of the frame for later use
-    filename = "video_frame/" + uuid.uuid4().hex + ".jpg"
+    #filename = "video_frame/" + uuid.uuid4().hex + ".jpg"
     while True:
         # Capture a frame for processing
         success, frame = vcap.read()
-        if not success:
+        if not success or frame is None:
+            print("Failed to read frame or frme is None.")
             break
         else:
+            frameId = int(round(vcap.get(1)))
+            if skipCount > 1 and frameId % skipCount != 0:
+                continue
 
             rowCall = {}
 
             image = frame.copy()
-            cv2.imwrite(filename, frame)
+            # cv2.imwrite(filename, frame)
+            success, jpeg = cv2.imencode(".jpg", frame)
 
             eventList = []
 
             # call inference REST API
-            detect.invokeModel(filename)
+            # detect.invokeModel(filename)
+            detect.invokeModel(jpeg.tobytes())
             # os.remove(filename)
             count = 0
             for d in detect.getNameCenterAndConfidence():
@@ -211,20 +220,28 @@ def events(ws):
 
 if __name__ == '__main__':
 
-    doHousekeeping()
+    # doHousekeeping()
+    
+    section = 'DEFAULT'
 
-    # process command line options
-    parser = argparse.ArgumentParser(description="Flask api exposing robot tracking video and metadata")
-    parser.add_argument("--port", default=5005, type=int, help="eg, port 5005")
-    parser.add_argument("--RTSP_URL", 
-        default="rtsp://localhost:8554/mystream",
-        help="eg, rtsp://localhost:8554/mystream")
-    parser.add_argument("--INFERENCE_API_URL" ,
-        default="http://127.0.0.1:5000/v1/object-detection/yolov5",
-        help="eg, http://127.0.0.1:5000/v1/object-detection/yolov5")
-    parser.add_argument("--DETECTION", 
-        default="Yolo",
-        help="eg, Yolo or Apriltag")
-    args = parser.parse_args()
+    config = configparser.ConfigParser()
+    #config.read('/app/config/properties.ini')
+    config.read('config/properties.ini')
+    # if section == 'DEFAULT':
+    #     config.read('/app/config/properties.ini')
+    # else:
+    #     config.read('./config/properties.ini')
 
-    app.run(host="0.0.0.0", port=args.port)
+    rtsp_url = config[section]['rtsp_url']
+    yolov5_url = config[section]['yolov5_url']
+    apriltag_url = config[section]['apriltag_url']
+    # detection can be either 'Yolov5' or 'Apriltag'
+    #detection = config[section]['detection']
+    target_fps = os.environ['TARGET_FPS']
+    detection = os.environ['DETECTION'] 
+    print("* {}: {}".format('rtsp_url', rtsp_url))
+    print("* {}: {}".format('target_fps', target_fps))
+    print("* {}: {}".format('yolov5_url', yolov5_url))
+    print("* {}: {}".format('apriltag_url', apriltag_url))
+    print("* {}: {}".format('detection', detection))
+    app.run(host="0.0.0.0", port=5005)

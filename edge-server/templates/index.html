@@ -12,6 +12,7 @@
     <div id="video_display">
         <div style="width: auto; margin-left: auto; margin-right: auto">
             <h3>Inference Output Video Streaming</h3>
+            <!-- <img width="80%" src="{{ url_for('video', _external=True, _scheme='https') }}"> -->
             <img width="80%" src="{{ url_for('video') }}">
         </div>
         <div id="event_display" style="width: auto; margin-left: auto; margin-right: auto">
@@ -21,8 +22,10 @@
 
         <script>
 
-            var url = "{{ url_for('events') }}"
-            const socket = new WebSocket(url);
+            // var url = "{{ url_for('events') }}"
+            // const socket = new WebSocket(url);
+            // const socket = new WebSocket("{{ url_for('events') }}");
+            const socket = new WebSocket("{{ url_for('events') }}");
             socket.addEventListener('message', ev => {
                 msg = JSON.parse(ev.data);
                 document.getElementById('events').innerHTML =  msg['text'] + "\n" + 

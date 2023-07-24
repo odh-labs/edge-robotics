@@ -9,18 +9,18 @@
 </head>
 <body>
 <div class="container">
-    <div id="event_display" style="width: auto; margin-left: auto; margin-right: auto">
+    <div class="left" id="event_display" style="width: auto; margin-left: auto; margin-right: auto">
         <h3>Robot State Change Events: </h3>
-        <textarea readonly cols="60" rows="8" wrap="hard" id="events"></textarea> 
+        <textarea readonly cols="40" rows="8" wrap="hard" id="events"></textarea> 
     <div>
-    <div id="video_display">
+    <div class="right" id="video_display">
         <div style="width: auto; margin-left: auto; margin-right: auto">
             <h3>Inference Output Video:</h3>
-            <img width="80%" src="http://localhost:5005/video">
+            <img src="https://edge-server-edge-server.apps-crc.testing/video">
         </div>
 
         <script>
-            const socket = new WebSocket('ws://localhost:5005/events');
+            const socket = new WebSocket('ws://edge-server-edge-server.apps-crc.testing/events');
             socket.addEventListener('message', ev => {
                 msg = JSON.parse(ev.data);
                 document.getElementById('events').innerHTML =  msg['text'] + "\n" + 

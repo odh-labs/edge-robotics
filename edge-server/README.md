@@ -1,47 +1,24 @@
-# Under Construction
+# Tracking the Robots
 
-***All files in this folder are subject to minor/major changes.***
+The edge-server is the application to track the robots and display the annotated video and events.
 
-## 1. Prerequisites to run Demo:
-1. A RTSP server streaming video as input
-2. The Inference REST API to detect trackRobotsApp
-3. A virtua environment having all the required packages in the requirements.txt installed
-4. start the flask app: 
-        python trackRobotsApp.py 
-    using default options
+## 1. Prerequisites to run the Demo:
+1. A RTSP server streaming video to the edge server
+2. ffmpeg to stream a video or a camera video stream to the RTSP server as input
+3. The AI Inference REST API to detect our robots in an image
+4. The edge server gets its video feed from the RTSP server and uses the REST API to detect the robots and tracks their movements.
 
 ## 2. Ways to run:
-1. point your browser to the root flask app URL eg, http://host:port/
-2. open the robotTracking.html using a browser. Note the URLs are hardcoded (for now).
-    You may need to change them.
+1. Deploy all components using podman and point your browser at http://host:5005/
+2. Deploy all components on OpenShift/MicroShift and point your browser at http://host:30505/
+3. Deploy all components on Kubernetes and point your browser at http://host:30505/
 
-Getting help:
-~~~~
-python trackRobotsApp.py --help
-usage: trackRobotsApp.py [-h] [--port PORT] [--RTSP_URL RTSP_URL]
-                         [--INFERENCE_API_URL INFERENCE_API_URL]
-                         [--DETECTION DETECTION]
+More information on how to deploy the components can be found in folder: "deployment/commandline"
 
-Flask api exposing robot tracking video and metadata
+## 3. AMD-64 and ARM-64 Images
+You can build an AMD-64 image on an Intel PC or an ARM-64 images on an ARM machine such as a Reapberry Pi 4.
+The AMD-64 and ARM-64 images can be pulled from quay.io:
+* quay.io/andyyuen/edge-server:latest
+* quay.io/andyyuen/edge-server-arm64:latest
 
-options:
-  -h, --help            show this help message and exit
-  --port PORT           eg, port 5005
-  --RTSP_URL RTSP_URL   eg, rtsp://localhost:8554/mystream
-  --INFERENCE_API_URL INFERENCE_API_URL
-                        eg, http://127.0.0.1:5000/v1/object-detection/yolov5
-  --DETECTION DETECTION
-                        eg, Yolo or Apriltag
-
-~~~~
-Example:
-~~~~
-python trackRobotsApp.py
-
-using default options is equivalent to:
-
-python trackRobotsApp.py --port 5005 \
---INFERENCE_API_URL http://localhost:5000/v1/object-detection/yolov5 \
---RTSP_URL  rtsp://localhost:8554/mystream \
---DETECTION Yolo
-~~~~
+respectively.
