@@ -1,20 +1,48 @@
-## Will be updated soon.
-Usage:
-edge-setup-openshift.sh username
-- username is the user you have logged in to OpenShift
+# Deployment
 
-edge-setup-microshift.sh
-- no input parameter required
+The deployment has changed significantly from the previous version. Before, each application is deployed in a separate namespace or project. The new way puts all 3 containers (edge-rtsp, robots-cpu and edge-server) in a singe pod to make the communication faster using localhost to reduce video ghosting.
 
-All apps are deployed using node port to make using them easy for MicroShift.
+The demo will be deployed in a namespace/project named 'edge-demo'.
 
-Note that rtsp only installed the rtsp server. You need to stream video to it:
-OpenShift:
-ffmpeg -re -stream_loop -1 -r 15 -i $FILE -c copy -f rtsp rtsp://openshift-host-ip:30854/mystream
+And the services are exposed using node ports.
 
-MicroShift:
-ffmpeg -re -stream_loop -1 -i $FILE -c copy -f rtsp rtsp://microshift-host-ip:30854/mystream
+## 1. Deploy using Podman
+<pre>
+podmanDeploy.sh amd64|arm64
+</pre>
+amd64|arm64 means installing either amd64 or Arm64 version. Specify one or the other.
 
-To invoke the annotated video with events, point you browser to:
-http://host-ip:30505
+And point your browser at http://host:5005/
+
+host is either the hostname or the node IP address.
+
+## 2. Deploy to OpenShift
+<pre>
+openshiftDeploy.sh loggedinUser
+</pre>
+loggedinUser is the user used to login to OpenShift.
+
+And point your browser at http://host:30505/
+
+## 3. Deploy to MicroShift and Kubernetes
+<pre>
+microshiftAndKxsDeploy.sh amd64|arm64
+</pre>
+amd64|arm64 means installing either amd64 or arm64 version. Specify one or the other.
+
+And point your browser at http://host:30505/
+
+
+## 4. Set Up Video Source
+You have to set up the video source (a video file or a camera video stream) to the edge-rtsp container. The command line described below is for streaming a video file defined in the environment variable: $FILE
+
+For podman:
+<pre>
+ffmpeg -re -stream_loop -1 -i $FILE -c copy -f rtsp rtsp://host:8554/mystream
+</pre>
+
+For OpenShift/MicroShift/KxS:
+<pre>
+ffmpeg -re -stream_loop -1 -i $FILE -c copy -f rtsp rtsp://host:30854/mystream
+</pre>
 

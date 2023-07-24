@@ -1,0 +1,150 @@
+# Generation of Kubernetes YAML is still under development!
+#
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-3.0.1
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2023-07-21T21:36:39Z"
+  labels:
+    app: edge-demo-pod
+  name: edge-demo-pod
+spec:
+  containers:
+  - command:
+    - python
+    - /app/trackRobotsApp.py
+    env:
+    - name: PATH
+      value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    - name: TERM
+      value: xterm
+    - name: container
+      value: oci
+    - name: DETECTION
+      value: Yolov5
+    - name: DISTTAG
+      value: f38container
+    - name: FGC
+      value: f38
+    - name: TARGET_FPS
+      value: "5"
+    image: quay.io/andyyuen/edge-server:latest
+    name: edge-server
+    ports:
+    - containerPort: 8554
+      hostPort: 8554
+      protocol: TCP
+    - containerPort: 5000
+      hostPort: 5000
+      protocol: TCP
+    - containerPort: 5005
+      hostPort: 5005
+      protocol: TCP
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities:
+        drop:
+        - CAP_MKNOD
+        - CAP_NET_RAW
+        - CAP_AUDIT_WRITE
+      privileged: false
+      readOnlyRootFilesystem: false
+      runAsGroup: 1000
+      runAsUser: 1000
+      seLinuxOptions: {}
+    workingDir: /app
+  - command:
+    - /mediamtx
+    env:
+    - name: PATH
+      value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    - name: TERM
+      value: xterm
+    - name: container
+      value: podman
+    - name: RTSP_PROTOCOLS
+      value: tcp
+    image: quay.io/andyyuen/edge-rtsp:latest
+    name: rtsp
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities:
+        drop:
+        - CAP_MKNOD
+        - CAP_NET_RAW
+        - CAP_AUDIT_WRITE
+      privileged: false
+      readOnlyRootFilesystem: false
+      runAsGroup: 1000
+      runAsUser: 1000
+      seLinuxOptions: {}
+    workingDir: /
+  - command:
+    - python
+    - backend.py
+    env:
+    - name: PATH
+      value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    - name: TERM
+      value: xterm
+    - name: container
+      value: oci
+    - name: FGC
+      value: f38
+    - name: DISTTAG
+      value: f38container
+    image: quay.io/andyyuen/robots-cpu:latest
+    name: yolo
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities:
+        drop:
+        - CAP_MKNOD
+        - CAP_NET_RAW
+        - CAP_AUDIT_WRITE
+      privileged: false
+      readOnlyRootFilesystem: false
+      runAsGroup: 1000
+      runAsUser: 1000
+      seLinuxOptions: {}
+    workingDir: /app
+  dnsConfig: {}
+  restartPolicy: Never
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2023-07-21T21:36:39Z"
+  labels:
+    app: edge-demo-pod
+  name: edge-demo-pod
+spec:
+  ports:
+  - name: "8554"
+    nodePort: 30854
+    port: 8554
+    protocol: TCP
+    targetPort: 0
+  - name: "5000"
+    nodePort: 30500
+    port: 5000
+    protocol: TCP
+    targetPort: 0
+  - name: "5005"
+    nodePort: 30505
+    port: 5005
+    protocol: TCP
+    targetPort: 0
+  selector:
+    app: edge-demo-pod
+  type: NodePort
+status:
+  loadBalancer: {}
+
