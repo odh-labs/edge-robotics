@@ -21,7 +21,7 @@ sudo dnf group install "C Development Tools and Libraries" "Development Tools"
 sudo apt-get update && apt-get install build-essential cmake ffmpeg libsm6 libxext6 -y
 ~~~~
 
-Then, you create a virual environment and install the dependent Python packages:
+Then, you create a virtual environment and install the dependent Python packages:
 
 ~~~~
 # create virtual environment

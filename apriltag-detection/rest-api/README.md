@@ -95,3 +95,11 @@ The only info needed for our use case is the tag_id which identifies the robot a
 
 If there were more such robots with different AprilTags, and if they were detected, the JSON output would have contained all detected AprilTag information.
 The other info returned eg, homography is used in more advanced robotic applications such as pose estimation, camera calibration and we are not going to discuss it here
+
+## 4. AMD-64 and ARM-64 Images
+You can use the same Dockerfile to build an AMD-64 image on an Intel PC or an ARM-64 images on an ARM machine such as a Reapberry Pi 4.
+The AMD-64 and ARM-64 images can be pulled from quay.io:
+* quay.io/andyyuen/apriltag-detect:latest
+* quay.io/andyyuen/apriltag-detect-arm64:latest
+
+respectively.
