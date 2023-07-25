@@ -1,12 +1,28 @@
 #! /bin/bash
 
+FPS=7
+
 # check if required parameter is present in command line
 if [ $#  -ne 1  ]; then
-	echo "Usage: $0 loggedInUser"
+	echo "Usage: $0 loggedInUser [targetFps]"
 	exit 1
 fi
 
+# check if targetFps has been specified
+if [ $# -gt 1 ]; then
+        re='^[0-9]+$'
+        if ! [[ $2 =~ $re ]] ; then
+                echo "Usage: $0  loggedInUser [targetFps]"
+                exit 3
+        else
+                FPS=$2
+        fi
+fi
+
 USER=$1
+
+#echo "USER=$USER"
+#echo "FPS=$FPS"
 
 # check if intended user has logged in
 WHO=`oc whoami`
@@ -38,7 +54,10 @@ do
         printf 'Project %s does not exist, creating project and doing deployment\n' "$PROJECT"
         echo "-------------------------------------------------------------------"
         oc new-project $PROJECT
+	sed -i -e '/TARGET_FPS/!b; n; s/"[0-9]*"/'\""$FPS"\"'/' edge-demo.yaml
         oc create -f edge-demo.yaml
     fi
 done
 echo "*******************************************************************"
+
+exit 0

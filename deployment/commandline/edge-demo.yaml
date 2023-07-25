@@ -30,7 +30,7 @@ spec:
     - name: FGC
       value: f38
     - name: TARGET_FPS
-      value: "5"
+      value: "2"
     image: quay.io/andyyuen/edge-server:latest
     name: edge-server
     ports:
