@@ -1,6 +1,8 @@
-VMNAME=microshift-starter4.13
+TODAY=$(date +%F_%H-%M-%S)
+VMNAME=microshift-starter4.13-$TODAY
 DVDISO=/var/lib/libvirt/images/rhel-9.2-$(uname -m)-dvd.iso
 KICKSTART=https://raw.githubusercontent.com/odh-labs/edge-robotics/main/edge-hardware/MicroShift/uShift4.13/MicroShift4.13-start.ks
+
 
 #sudo -b bash -c " \
 sudo -s \
