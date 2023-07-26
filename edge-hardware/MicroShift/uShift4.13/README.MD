@@ -12,8 +12,8 @@ Pre-requs:
 - add your public key to the authorized_keys file on the nucs, eg: ssh-copy-id -i ~/.ssh/id_rsa.pub <username>@<NUC_IP>
 
 Option a: Steps to create a KVM image from scratch
-- run bootStrapMicroShift.sh
-- add the nuc(s) to the hosts file
+- run bootStrapMicroShift.sh on your control host (eg your laptop)
+- add the edge devices / nuc(s) to the hosts file
 
 Option b: Steps for the RedPill
 - PXE boot Red Pill Nuc into MicroShift (creates an empty RHEL 9.2 image)
