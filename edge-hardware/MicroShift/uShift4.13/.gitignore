@@ -1,0 +1,4 @@
+Secrets.yaml
+secrets.yaml
+openshift-pull-secret
+*.qcow2
