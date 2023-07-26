@@ -9,7 +9,7 @@ Pre-requs:
 - Copy your OpenShift pull-secret into this (the uShift4.13) directory
 - rename openshift-pull-secret.sample to openshift-pull-secret add your pull secret to openshift-pull-secret
 - update secrets.yaml (after renaming secrets.yaml.sample to secrets.yaml) - adding your subscription org and id.
-- add your public key to the authorized_keys file on the nucs, eg: ssh-copy-id -i ~/.ssh/id_rsa.pub <username>@<NUC_IP>
+- add your public key to the authorized_keys file on the nucs, eg: ssh-copy-id -i ~/.ssh/id_rsa.pub <username>@<NUC_IP> or run the ansible playbook with the --ask-pass option for example: ansible-playbook -i ./hosts ./microshift.yaml -vv --ask-pass
 
 Option a: Steps to create a KVM image from scratch
 - run `sudo bootStrapMicroShift.sh' on your control host (eg your laptop) to create your time and datestamped local qcow image.
