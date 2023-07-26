@@ -17,6 +17,14 @@
     - ./secrets.yaml
   tasks:
 
+  - name: Copy ssh-id (public key) to MicroShift image to enable authenticationb // ssh-copy-id -i ~/.ssh/id_rsa.pub redhat@192.168.122.91
+    ansible.posix.authorized_key:
+      user: redhat
+      state: present
+      key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+  
+ 
+
   - name: Enable Red Hat Subscription if we're on RHEL
     include_role: name=register-rhel-subscription
     when: 
