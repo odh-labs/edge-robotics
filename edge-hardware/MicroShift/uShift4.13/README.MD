@@ -12,7 +12,7 @@ Pre-requs:
 - add your public key to the authorized_keys file on the nucs, eg: ssh-copy-id -i ~/.ssh/id_rsa.pub <username>@<NUC_IP>
 
 Option a: Steps to create a KVM image from scratch
-- run `sudo bootStrapMicroShift.sh' on your control host (eg your laptop)
+- run `sudo bootStrapMicroShift.sh' on your control host (eg your laptop) to create your time and datestamped local qcow image.
 - add the edge devices / nuc(s) to the hosts file
 
 Option b: Steps for the RedPill
