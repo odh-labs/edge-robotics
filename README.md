@@ -3,8 +3,23 @@
 This is the repositiory for the Edge based Robotics AI/ML Demo. This architecture diagram depicts the currently proposed architecture. The solution is evolving and this will certainly change.
 ![images/architecture-v1-edge-based-robots-demo.png](images/architecture-v1-edge-based-robots-demo.png)
 
+And here is a screenshot of running two instances of our Robots Demo at the same time.
+![images/robot-ai-model-inference.png](images/robot-ai-model-inference.png)
+
+
+# Objectives
+This project is not just about building an AI model to recognise robots and determining whether they are moving or have stopped over 2 seconds It is also about the following topics:
+* Onboarding edge devices with strong authentication using FIDO
+* Red Hat OpenShift Data Science (RHODS)
+* One-click setup of infrastructure and demo
+* ML-OPs using Tekton and Argo CD
+* Container technologies including podman, OpenShift, MicroShift and Kubernetes
+* hybrid cloud/multi cloud
+* ...
 
 ## Folders
+
+***New folders and contents inside the folders are being continuously updated as new requirements and use cases are added. The description below will be outdated quickly.***
 
 - [Arduino](https://github.com/odh-labs/edge-robotics/tree/main/Arduino) - contains two projects: 1) programmable-robot: the robot control sketch for our chosen programmable robot for the demo. And 2)
 rstp-camera: the sketch to make our chosen camera into a RTSP server for streaming videos.
