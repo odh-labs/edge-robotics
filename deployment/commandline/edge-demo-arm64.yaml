@@ -31,7 +31,7 @@ spec:
       value: f38
     - name: TARGET_FPS
       value: "2"
-    image: quay.io/andyyuen/edge-server-arm64:latest
+    image: quay.io/andyyuen/edge-server-arm64:1.0
     name: edge-server
     ports:
     - containerPort: 8554
@@ -68,7 +68,7 @@ spec:
       value: podman
     - name: RTSP_PROTOCOLS
       value: tcp
-    image: quay.io/andyyuen/edge-rtsp-arm64:latest
+    image: quay.io/andyyuen/edge-rtsp-arm64:1.0
     name: rtsp
     resources: {}
     securityContext:
@@ -98,7 +98,7 @@ spec:
       value: f38
     - name: DISTTAG
       value: f38container
-    image: quay.io/andyyuen/robots-cpu-arm64:latest
+    image: quay.io/andyyuen/robots-cpu-arm64:1.0
     name: yolo
     resources: {}
     securityContext:
