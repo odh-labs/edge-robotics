@@ -1,7 +1,7 @@
 This file describes the order, installation, wiring and software configuration process to have the Mitsubishi MELSEC PLC running.
 The 2nd part of this document describes how to connect the MELSEC PLC with the Takebishi DeviceGateway (dgw) on OpenShift.
 
-ORDERING
+## ORDERING
 I ordered the 3 necessary parts at the Amazon Japan website:
 
 1. Power Supply, Base Unit, CPU Unit:
@@ -16,8 +16,15 @@ https://amzn.asia/d/4StJQIC
 
 The actual PLC (CPU Unit) is the most expensive one. I ordered a 'like new' model which was roughly Y20,000 cheaper than a brand new one.
 
-WIRING
+## WIRING
 Once the power supply and PLC are plugged into the base unit you need to wire up the power-supply and connect to a 220V/50Hz live-wire power supply!
 In Australia  you need a licencsed electrition to do this work.
 
 ![Image](melsec.png)
+
+
+## Configuration
+You need the Mitsubishi GXWorks2 application, which is only available on Windows.
+Hence step #1 is to get your Windows operating system installed.
+Then Download GXWorks2, setup your account and then configure the windows applications.
+
