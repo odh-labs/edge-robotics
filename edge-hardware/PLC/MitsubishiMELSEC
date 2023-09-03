@@ -1,0 +1,18 @@
+This file describes the order, installation, wiring and software configuration process to have the Mitsubishi MELSEC PLC running.
+The 2nd part of this document describes how to connect the MELSEC PLC with the Takebishi DeviceGateway (dgw) on OpenShift.
+
+Ordering
+I ordered the 3 necessary parts at the Amazon Japan website:
+
+1. Power Supply, Base Unit, CPU Unit:
+Power Unit
+https://amzn.asia/d/doHS3DC
+
+Base Unit
+https://amzn.asia/d/8xn6s8J
+
+CPU Unit
+https://amzn.asia/d/4StJQIC
+
+The actual PLC (CPU Unit) is the most expensive one. I ordered a 'like new' model which was roughly Y20,000 cheaper than a brand new one.
+
