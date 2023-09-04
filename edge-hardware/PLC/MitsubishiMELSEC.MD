@@ -42,8 +42,16 @@ This will lead to a 'Turn Windows features on or off' dialog -> Select .NET Fram
 Assuming everything went well you will end up with the MELSOFT Series GX Works2 program running on your Windows 11 box:
 ![Image](GXWorks2Installation4.png)
 
-## Quick Start Guide for the first time user:
-https://dl.mitsubishielectric.co.jp/dl/fa/document/catalog/plcq/l08139e/l08139eb.pdf
+## Quick Start Guide for the first time user which is unfortunately based on GX Developer so unusable for our scenario.
+GXDeveloper version, English: https://dl.mitsubishielectric.co.jp/dl/fa/document/catalog/plcq/l08139e/l08139eb.pdf
+GX Works2 version, Japanese: https://dl.mitsubishielectric.co.jp/dl/fa/document/catalog/plcq/l08138/l08138d.pdf
 
+To reproduce the following flow do the following:
+- Connect the PLC CPU module via USB to your Windows 11 system (bare metal or Virtual Machine (ensure you have USB passthrough configured)
+- Import the demo project, via File >> Open
+- Click on 'Connection Desitination' and double click on Connection1.
+- click 'Connection Test'
+If everything goes according to plan you should see the following 'Successfully connected with the Q03UDVCPU' message
+![Image](PLCSuccessfullyConnected.png)
 
 
