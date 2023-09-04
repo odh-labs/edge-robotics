@@ -25,6 +25,20 @@ In Australia  you need a licencsed electrition to do this work.
 
 ## Configuration
 You need the Mitsubishi GXWorks2 application, which is only available on Windows.
-Hence step #1 is to get your Windows operating system installed.
-Then Download GXWorks2, setup your account and then configure the windows applications.
+- Hence step #1 is to get your Windows 11 operating system installed.
+- Then Download GXWorks2, setup your account and then configure the windows applications.
+You can directly search for the trial version of GX Works2.
+Or download it from here:
+https://www.mitsubishifa.co.th/en/Software-Detail.php?id=MTE=&vs=trial
+I've used Version 1.600A from December 2020
+Link address: https://www.mitsubishifa.co.th/files/dl/sw1dnd-gxw2-e_1.600a_t.zip
+
+- You will need .NET 3.5 installed.
+In order to do that go to the search bar and type in 'Windows Features'.
+This will lead to a 'Turn Windows features on or off' dialog -> Select .NET Framework 3.5 (includes.NET 2.0 and 3.0)
+
+- Then extract the installer.zip and double-click the setup.exe for GX Works2 which will trigger the Install Shield Wizard to kick-off the installation.
+
+
+
 
