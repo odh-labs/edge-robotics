@@ -48,10 +48,15 @@ GX Works2 version, Japanese: https://dl.mitsubishielectric.co.jp/dl/fa/document/
 
 To reproduce the following flow do the following:
 - Connect the PLC CPU module via USB to your Windows 11 system (bare metal or Virtual Machine (ensure you have USB passthrough configured)
+- Download the demo project from https://github.com/odh-labs/edge-robotics/blob/main/edge-hardware/PLC/plc-demo.gxw.zip
 - Import the demo project, via File >> Open
 - Click on 'Connection Desitination' and double click on Connection1.
 - click 'Connection Test'
 If everything goes according to plan you should see the following 'Successfully connected with the Q03UDVCPU' message
 ![Image](PLCSuccessfullyConnected.png)
 
+Then:
+- Click on the 'Project' tab
+- Open up 'Parameter' tree icon and click on 'PLC Parameter' then
+- Configure your network settingws
 
