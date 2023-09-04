@@ -39,6 +39,9 @@ This will lead to a 'Turn Windows features on or off' dialog -> Select .NET Fram
 
 - Then extract the installer.zip and double-click the setup.exe for GX Works2 which will trigger the Install Shield Wizard to kick-off the installation.
 
+Assuming everything went well you will end up with the MELSOFT Series GX Works2 program running on your Windows 11 box:
+![Image](GXWorks2Installation4.png)
+
 
 
 
