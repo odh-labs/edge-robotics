@@ -42,6 +42,8 @@ This will lead to a 'Turn Windows features on or off' dialog -> Select .NET Fram
 Assuming everything went well you will end up with the MELSOFT Series GX Works2 program running on your Windows 11 box:
 ![Image](GXWorks2Installation4.png)
 
+## Quick Start Guide for the first time user:
+https://dl.mitsubishielectric.co.jp/dl/fa/document/catalog/plcq/l08139e/l08139eb.pdf
 
 
 
