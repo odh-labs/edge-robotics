@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1510pt" height="1264pt" viewBox="0.00 0.00 1509.97 1264.00">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 1260)">
+<title>%0</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-1260 1505.9745,-1260 1505.9745,4 -4,4"/>
+<text text-anchor="middle" x="750.9873" y="-1225" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">Red Hat OpenShift Data Science - Edge Demo Workflow</text>
+<!-- model -->
+<g id="node1" class="node">
+<title>model</title>
+<polygon fill="#d3d3d3" stroke="#000000" points="401.6765,-1035.5 401.6765,-1211.5 1069.4805,-1211.5 1069.4805,-1035.5 401.6765,-1035.5"/>
+<text text-anchor="start" x="573.0385" y="-1181.5" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="30.00" fill="#000000">1 - Build Model</text>
+<text text-anchor="start" x="773.0635" y="-1181.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">               </text>
+<polyline fill="none" stroke="#000000" points="401.6765,-1167.5 1069.4805,-1167.5 "/>
+<text text-anchor="start" x="414.7" y="-1136.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">a) RHODS Notebook builds model with pytorch. </text>
+<polyline fill="none" stroke="#000000" points="401.6765,-1123.5 1069.4805,-1123.5 "/>
+<text text-anchor="start" x="409.6885" y="-1092.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">b) RHODS Notebook saves model pytorch pt file.</text>
+<polyline fill="none" stroke="#000000" points="401.6765,-1079.5 1069.4805,-1079.5 "/>
+<text text-anchor="start" x="409.6765" y="-1048.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">c) RHODS Notebook pushes pytorch pt file to git.</text>
+</g>
+<!-- container -->
+<g id="node2" class="node">
+<title>container</title>
+<polygon fill="#d3d3d3" stroke="#000000" points="386.225,-602.5 386.225,-998.5 1084.932,-998.5 1084.932,-602.5 386.225,-602.5"/>
+<text text-anchor="start" x="466.7545" y="-968.5" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="30.00" fill="#000000">2 - Containerise + Attest Model</text>
+<text text-anchor="start" x="879.3475" y="-968.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">               </text>
+<polyline fill="none" stroke="#000000" points="386.225,-954.5 1084.932,-954.5 "/>
+<text text-anchor="start" x="399.6505" y="-923.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">a) Tekton CI EventListener running in OpenShift.   </text>
+<polyline fill="none" stroke="#000000" points="386.225,-910.5 1084.932,-910.5 "/>
+<text text-anchor="start" x="397.9825" y="-879.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">b) Github fires webhook to Tekton EventListener.   </text>
+<polyline fill="none" stroke="#000000" points="386.225,-866.5 1084.932,-866.5 "/>
+<text text-anchor="start" x="397.9825" y="-835.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">c) Tekton Trigger validates the github push event.  </text>
+<polyline fill="none" stroke="#000000" points="386.225,-822.5 1084.932,-822.5 "/>
+<text text-anchor="start" x="397.987" y="-791.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">d) Tekton Task clones codebase into workspace.   </text>
+<polyline fill="none" stroke="#000000" points="386.225,-778.5 1084.932,-778.5 "/>
+<text text-anchor="start" x="398.014" y="-747.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">e) Tekton Task builds container image locally.        </text>
+<polyline fill="none" stroke="#000000" points="386.225,-734.5 1084.932,-734.5 "/>
+<text text-anchor="start" x="398.848" y="-703.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">f) Tekton Task signs container image with cosign.  </text>
+<polyline fill="none" stroke="#000000" points="386.225,-690.5 1084.932,-690.5 "/>
+<text text-anchor="start" x="394.225" y="-659.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">g) Tekton Task pushes image + signatures to quay.</text>
+<polyline fill="none" stroke="#000000" points="386.225,-646.5 1084.932,-646.5 "/>
+<text text-anchor="start" x="398.8525" y="-615.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">h) Tekton Task raises git pr for new image digest.  </text>
+</g>
+<!-- model&#45;&gt;container -->
+<g id="edge1" class="edge">
+<title>model-&gt;container</title>
+<path fill="none" stroke="#000000" d="M735.5785,-1035.2388C735.5785,-1026.7569 735.5785,-1017.9329 735.5785,-1008.8945"/>
+<polygon fill="#000000" stroke="#000000" points="739.0786,-1008.6053 735.5785,-998.6053 732.0786,-1008.6054 739.0786,-1008.6053"/>
+</g>
+<!-- approve -->
+<g id="node3" class="node">
+<title>approve</title>
+<polygon fill="#d3d3d3" stroke="#000000" points="371.672,-433.5 371.672,-565.5 1099.485,-565.5 1099.485,-433.5 371.672,-433.5"/>
+<text text-anchor="start" x="511.351" y="-535.5" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="30.00" fill="#000000">3 - Approve Deployment</text>
+<text text-anchor="start" x="834.751" y="-535.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">               </text>
+<polyline fill="none" stroke="#000000" points="371.672,-521.5 1099.485,-521.5 "/>
+<text text-anchor="start" x="379.672" y="-490.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">a) GitHub pull request validates new container image.</text>
+<polyline fill="none" stroke="#000000" points="371.672,-477.5 1099.485,-477.5 "/>
+<text text-anchor="start" x="380.5015" y="-446.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">b) GitHub pull request merged to signify approval.      </text>
+</g>
+<!-- container&#45;&gt;approve -->
+<g id="edge2" class="edge">
+<title>container-&gt;approve</title>
+<path fill="none" stroke="#000000" d="M735.5785,-602.2453C735.5785,-593.0897 735.5785,-584.1971 735.5785,-575.7238"/>
+<polygon fill="#000000" stroke="#000000" points="739.0786,-575.6066 735.5785,-565.6066 732.0786,-575.6067 739.0786,-575.6066"/>
+</g>
+<!-- pull -->
+<g id="node4" class="node">
+<title>pull</title>
+<polygon fill="#d3d3d3" stroke="#000000" points="0,-66.5 0,-330.5 711.157,-330.5 711.157,-66.5 0,-66.5"/>
+<text text-anchor="start" x="93.0095" y="-300.5" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="30.00" fill="#000000">4a - Pull + Verify + Run Model</text>
+<text text-anchor="start" x="493.0925" y="-300.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">               </text>
+<polyline fill="none" stroke="#000000" points="0,-286.5 711.157,-286.5 "/>
+<text text-anchor="start" x="8" y="-255.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">a) Edge Device scheduled process pulls new image.</text>
+<polyline fill="none" stroke="#000000" points="0,-242.5 711.157,-242.5 "/>
+<text text-anchor="start" x="16.349" y="-211.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">b) New image has provenance verified locally.        </text>
+<polyline fill="none" stroke="#000000" points="0,-198.5 711.157,-198.5 "/>
+<text text-anchor="start" x="9.656" y="-167.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">c) New container starts up and becomes healthy.     </text>
+<polyline fill="none" stroke="#000000" points="0,-154.5 711.157,-154.5 "/>
+<text text-anchor="start" x="12.1925" y="-123.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">d) New container assumes primary operations.        </text>
+<polyline fill="none" stroke="#000000" points="0,-110.5 711.157,-110.5 "/>
+<text text-anchor="start" x="17.165" y="-79.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">d) Old container is killed and old image pruned.      </text>
+</g>
+<!-- approve&#45;&gt;pull -->
+<g id="edge3" class="edge">
+<title>approve-&gt;pull</title>
+<path fill="none" stroke="#000000" d="M652.1859,-433.4443C616.193,-404.9341 572.6535,-370.4462 530.1504,-336.7793"/>
+<polygon fill="#000000" stroke="#000000" points="532.2403,-333.9698 522.2283,-330.5042 527.8939,-339.4569 532.2403,-333.9698"/>
+</g>
+<!-- push -->
+<g id="node5" class="node">
+<title>push</title>
+<polygon fill="#d3d3d3" stroke="#000000" points="729.1825,-.5 729.1825,-396.5 1501.9745,-396.5 1501.9745,-.5 729.1825,-.5"/>
+<text text-anchor="start" x="843.828" y="-366.5" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="30.00" fill="#000000">4b - Push + Verify + Run Model</text>
+<text text-anchor="start" x="1262.274" y="-366.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">               </text>
+<polyline fill="none" stroke="#000000" points="729.1825,-352.5 1501.9745,-352.5 "/>
+<text text-anchor="start" x="742.194" y="-321.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">a) Edge device cluster is a ManagedCluster in RHACM. </text>
+<polyline fill="none" stroke="#000000" points="729.1825,-308.5 1501.9745,-308.5 "/>
+<text text-anchor="start" x="742.143" y="-277.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">b) Edge cluster organised into ManagedClusterSet.        </text>
+<polyline fill="none" stroke="#000000" points="729.1825,-264.5 1501.9745,-264.5 "/>
+<text text-anchor="start" x="737.1825" y="-233.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">c) RHACM Placement instructs new Model to be pushed.</text>
+<polyline fill="none" stroke="#000000" points="729.1825,-220.5 1501.9745,-220.5 "/>
+<text text-anchor="start" x="740.4885" y="-189.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">d) Edge Device cluster pulls new image.                          </text>
+<polyline fill="none" stroke="#000000" points="729.1825,-176.5 1501.9745,-176.5 "/>
+<text text-anchor="start" x="743.001" y="-145.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">e) New image has provenance verified locally.                </text>
+<polyline fill="none" stroke="#000000" points="729.1825,-132.5 1501.9745,-132.5 "/>
+<text text-anchor="start" x="743.808" y="-101.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">f) New container starts up and becomes healthy.            </text>
+<polyline fill="none" stroke="#000000" points="729.1825,-88.5 1501.9745,-88.5 "/>
+<text text-anchor="start" x="743.013" y="-57.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">g) New container assumes primary operations.               </text>
+<polyline fill="none" stroke="#000000" points="729.1825,-44.5 1501.9745,-44.5 "/>
+<text text-anchor="start" x="743.817" y="-13.5" font-family="Helvetica,sans-Serif" font-size="30.00" fill="#000000">h) Old container is killed and old image pruned.              </text>
+</g>
+<!-- approve&#45;&gt;push -->
+<g id="edge4" class="edge">
+<title>approve-&gt;push</title>
+<path fill="none" stroke="#000000" d="M818.9711,-433.4443C831.0248,-423.8965 843.9248,-413.6783 857.3489,-403.045"/>
+<polygon fill="#000000" stroke="#000000" points="859.6453,-405.6911 865.3109,-396.7383 855.2988,-400.2039 859.6453,-405.6911"/>
+</g>
+</g>
+</svg>

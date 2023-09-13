@@ -3,6 +3,8 @@
 This is the repositiory for the Edge based Robotics AI/ML Demo. This architecture diagram depicts the currently proposed architecture. The solution is evolving and this will certainly change.
 ![images/architecture-v1-edge-based-robots-demo.png](images/architecture-v1-edge-based-robots-demo.png)
 
+![images/model-flow-diagram.svg](images/model-flow-diagram.svg)
+
 And here is a screenshot of running two instances of our Robots Demo at the same time.
 ![images/robot-ai-model-inference.png](images/robot-ai-model-inference.png)
 
