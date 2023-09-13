@@ -60,3 +60,7 @@ Then:
 - Open up 'Parameter' tree icon and click on 'PLC Parameter' then
 - Configure your network settingws
 
+## Setting up Takebishi Device Gateway
+- organise license file from Takebishi
+- then follow instructions from the itap-demo branch at https://gitlab.com/yono1/devicegw-on-openshift/-/tree/itap-demo?ref_type=heads
+
