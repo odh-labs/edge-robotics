@@ -66,13 +66,7 @@ Then:
 
 ## Configuring the MELSEC PLC within the Takebishi Device Gateway configuration screens
 ![Image](image.png)
-![Image](image (1).png)
-![Image](image (2).png)
-![Image](image (3).png)
-![Image](image (4).png)
-![Image](image (5).png)
-![Image](image (6).png)
-![Image](image (7).png)
-![Image](image (8).png)
+![Image](image%20(5).png)
+
 
 
