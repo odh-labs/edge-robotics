@@ -1,0 +1,9 @@
+numpy
+onnx
+onnxruntime
+opencv_python_headless
+seaborn
+torch
+torchvision
+pyyaml
+tqdm
