@@ -65,14 +65,23 @@ Then:
 - then follow instructions from the itap-demo branch at https://gitlab.com/yono1/devicegw-on-openshift/-/tree/itap-demo?ref_type=heads
 
 ## Configuring the MELSEC PLC within the Takebishi Device Gateway configuration screens
+- Add a new PLC in the Data Source section
 ![Image](image.png)
+- Select the MELSEC option
 ![Image](image%20(1).png)
+- Click the configuration settings cog
 ![Image](image%20(2).png)
+- Click on the 'Configuration' tab on the left menue and add the entries as depicted
 ![Image](image%20(3).png)
+- Add Tags
 ![Image](image%20(4).png)
+- Create 3 tags in total
 ![Image](image%20(5).png)
+- Example setting for tag 3 (start addresses tag1=0, tag2=1, tag3=2)
 ![Image](image%20(6).png)
+- Save the settings
 ![Image](image%20(7).png)
+- Save configuration and restart the device gateway
 ![Image](image%20(8).png)
 
 
