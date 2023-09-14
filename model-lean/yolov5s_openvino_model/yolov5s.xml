@@ -10050,7 +10050,7 @@
 		<conversion_parameters>
 			<input_model value="DIR/yolov5s.onnx" />
 			<is_python_api_used value="False" />
-			<output_dir value="DIR" />
+			<output_dir value="/Users/arslankhan/Codes/edge-robotics/model-lean/convertToOpenvino/../yolov5s_openvino_model/" />
 		</conversion_parameters>
 		<framework>
 			<names value="{0: 'B-Robot', 1: 'R-Robot'}" />

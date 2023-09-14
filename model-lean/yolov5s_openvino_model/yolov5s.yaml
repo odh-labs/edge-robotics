@@ -1,0 +1,4 @@
+stride: 64
+names:
+  0: B-Robot
+  1: R-Robot
