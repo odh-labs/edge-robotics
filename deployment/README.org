@@ -56,6 +56,28 @@ EOF
 
 Once the operator is installed we can apply our ~ArgoCD~ custom resource definition. This will be picked up by the operator and a new argocd instance will be deployed based on the specification we provided.
 
+Before creating the custom resource let's ensure argocd will be able to fully manage our cluster by giving it the ~cluster-admin~ role.
+
+#+begin_src bash
+cat << EOF | oc apply --filename -
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: argocd-rbac-ca
+subjects:
+  - kind: ServiceAccount
+    name: openshift-gitops-argocd-application-controller
+    namespace: openshift-gitops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+EOF
+#+end_src
+
+#+RESULTS:
+: clusterrolebinding.rbac.authorization.k8s.io/argocd-rbac-ca created
+
 #+begin_src bash :results output
 cat << EOF | oc apply --filename -
 apiVersion: argoproj.io/v1alpha1
@@ -90,7 +112,7 @@ EOF
 #+end_src
 
 #+RESULTS:
-: argocd.argoproj.io/openshift-gitops configured
+: argocd.argoproj.io/openshift-gitops created
 
 
 * Apply openshift gitops application
