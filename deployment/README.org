@@ -1,0 +1,124 @@
+#+TITLE: Edge Robotics AI/ML Demo Environment Setup
+#+EMAIL: jablair@redhat.com
+#+AUTHOR: James Blair
+#+DATE: <2023-09-15 Fri 14:00>
+
+
+This document captures the process for setting up a new Red Hat ANZ edge robotics [[https://www.redhat.com/en/openshift-4][OpenShift 4]] "hub" cluster.
+
+These clusters are where:
+
+  - Models are trained using [[https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-data-science][Red Hat OpenShift Data Science]].
+  - Models are containerised using [[https://cloud.redhat.com/blog/introducing-openshift-pipelins][Red Hat OpenShift Pipelines]].
+
+The diagram below outlines the general flow for edge robotics demo environments:
+
+[[../images/model-flow-diagram.svg]]
+
+
+* Pre-requisites
+
+This process assumes you already have an OpenShift 4.12+ cluster running, and that you have cluster admin privileges.
+
+The steps below also rely on the ~oc~ openshift cli so ensure you have that installed as well. If you don't have this installed already follow [[https://docs.openshift.com/container-platform/4.12/cli_reference/openshift_cli/getting-started-cli.html][this install documentation]].
+
+
+* Deploying openshift gitops
+
+The goal of this setup process is to be as declarative as possible. With this in mind our first step on the new cluster will be to install the [[https://www.redhat.com/en/technologies/cloud-computing/openshift/gitops][OpenShift Gitops]] operator and creating an instance of [[https://argoproj.github.io/cd/][ArgoCD]] via the operator so that all remaining steps can be performed in a GitOps manner.
+
+
+** Install openshift gitops operator
+
+We can programatically install the openshift gitops operator in a declaritive way by creating a ~Subscription~ kubernetes custom resource to subscribe a given namespace to the Operator.
+
+#+begin_src bash :results output
+cat << EOF | oc apply --filename -
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: openshift-gitops-operator
+  namespace: openshift-operators
+spec:
+  channel: latest
+  installPlanApproval: Automatic
+  name: openshift-gitops-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  startingCSV: openshift-gitops-operator.v1.9.2
+EOF
+#+end_src
+
+
+** Create openshift gitops instance
+
+Once the operator is installed we can apply our ~ArgoCD~ custom resource definition. This will be picked up by the operator and a new argocd instance will be deployed based on the specification we provided.
+
+#+begin_src bash :results output
+cat << EOF | oc apply --filename -
+apiVersion: argoproj.io/v1alpha1
+kind: ArgoCD
+metadata:
+  name: openshift-gitops
+  namespace: openshift-gitops
+spec:
+  controller:
+    appSync: 3m0s
+  kustomizeBuildOptions: --enable-helm --enable-alpha-plugins
+  rbac:
+    policy: |
+      g, system:cluster-admins, role:admin
+      g, cluster-admins, role:admin
+    scopes: '[groups]'
+  resourceExclusions: |
+    - apiGroups:
+        - tekton.dev
+      clusters:
+        - '*'
+      kinds:
+        - TaskRun
+        - PipelineRun
+  server:
+    insecure: true
+    route:
+      enabled: true
+      tls:
+        insecureEdgeTerminationPolicy: Redirect
+        termination: edge
+  sso:
+    dex:
+      openShiftOAuth: true
+    provider: dex
+EOF
+#+end_src
+
+
+* Apply openshift gitops application
+
+From here, with openshift gitops running, all we need to do is apply the argocd ~Application~ custom resource, which points to a git repository containing our remaining manifests.
+
+This ~Application~ resource will be picked up by ArgoCD and periodically synchronised to our cluster.
+
+#+begin_src bash :results output
+cat << EOF | oc apply --filename -
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: edge-robotics-pipeline
+  namespace: openshift-gitops
+spec:
+  project: edge-robotics
+  source:
+    repoURL: https://github.com/jmhbnz/edge-robotics.git
+    targetRevision: main
+    path: deployment/gitops-build-pipeline
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: edge-robotics
+  syncPolicy:
+    automated:
+      prune: false
+    syncOptions:
+      - CreateNamespace=true
+EOF
+#+end_src
