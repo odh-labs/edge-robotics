@@ -45,9 +45,11 @@ spec:
   name: openshift-gitops-operator
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: openshift-gitops-operator.v1.9.2
 EOF
 #+end_src
+
+#+RESULTS:
+: subscription.operators.coreos.com/openshift-gitops-operator created
 
 
 ** Create openshift gitops instance
@@ -62,20 +64,15 @@ metadata:
   name: openshift-gitops
   namespace: openshift-gitops
 spec:
-  controller:
-    appSync: 3m0s
   kustomizeBuildOptions: --enable-helm --enable-alpha-plugins
   rbac:
+    defaultPolicy: role:admin
     policy: |
       g, system:cluster-admins, role:admin
       g, cluster-admins, role:admin
     scopes: '[groups]'
   resourceExclusions: |
-    - apiGroups:
-        - tekton.dev
-      clusters:
-        - '*'
-      kinds:
+    - kinds:
         - TaskRun
         - PipelineRun
   server:
@@ -91,6 +88,9 @@ spec:
     provider: dex
 EOF
 #+end_src
+
+#+RESULTS:
+: argocd.argoproj.io/openshift-gitops configured
 
 
 * Apply openshift gitops application
@@ -125,3 +125,15 @@ EOF
 
 #+RESULTS:
 : application.argoproj.io/edge-robotics-pipeline created
+
+
+* Teardown
+
+Finished with the demo environment and want to remove all edge robotics content from the cluster? No problem, just run the section below:
+
+#+begin_src bash :results silent
+oc --namespace openshift-gitops delete --ignore-not-found=true application  edge-robotics
+oc --namespace openshift-gitops delete --ignore-not-found=true argocd openshift-gitops
+oc --namespace openshift-operators delete --ignore-not-found=true subscription openshift-gitops-operator openshift-pipelines-operator
+oc delete --ignore-not-found=true project edge-robotics
+#+end_src
