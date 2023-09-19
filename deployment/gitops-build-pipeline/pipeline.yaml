@@ -3,7 +3,9 @@ apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
   name: model-pipeline
-  namespace: a-edge-robotics
+  namespace: edge-robotics
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   tasks:
     - name: git-clone

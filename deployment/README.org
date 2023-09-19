@@ -107,10 +107,10 @@ metadata:
   name: edge-robotics-pipeline
   namespace: openshift-gitops
 spec:
-  project: edge-robotics
+  project: default
   source:
     repoURL: https://github.com/jmhbnz/edge-robotics.git
-    targetRevision: main
+    targetRevision: automate-pipeline-creation
     path: deployment/gitops-build-pipeline
   destination:
     server: https://kubernetes.default.svc
@@ -122,3 +122,6 @@ spec:
       - CreateNamespace=true
 EOF
 #+end_src
+
+#+RESULTS:
+: application.argoproj.io/edge-robotics-pipeline created
