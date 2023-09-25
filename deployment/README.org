@@ -124,7 +124,7 @@ This ~Application~ resource will be picked up by ArgoCD and periodically synchro
 #+begin_src bash :results output
 cat << EOF | oc apply --filename -
 apiVersion: argoproj.io/v1alpha1
-kind: Application
+kind: ApplicationSet
 metadata:
   name: edge-robotics-pipeline
   namespace: openshift-gitops
@@ -133,21 +133,56 @@ spec:
   source:
     repoURL: https://github.com/jmhbnz/edge-robotics.git
     targetRevision: automate-pipeline-creation
-    path: deployment/gitops-build-pipeline
+    path: deployment/gitops-pipelines-operator
   destination:
     server: https://kubernetes.default.svc
     namespace: edge-robotics
   syncPolicy:
-    automated:
-      prune: false
     syncOptions:
       - CreateNamespace=true
-      - Validate=false
 EOF
 #+end_src
 
 #+RESULTS:
 : application.argoproj.io/edge-robotics-pipeline created
+
+
+#+begin_src bash :results output
+cat << EOF | oc apply --filename -
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: edge-robotics-pipeline
+  namespace: openshift-gitops
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - git:
+      repoURL: https://github.com/jmhbnz/edge-robotics.git
+      revision: automate-pipeline-creation
+      directories:
+      - path: deployment/gitops*
+  template:
+    metadata:
+      name: '{{.path.basename}}'
+    spec:
+      project: "default"
+      source:
+        repoURL: https://github.com/jmhbnz/edge-robotics.git
+        targetRevision: HEAD
+        path: '{{.path.path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: edge-robotics
+      syncPolicy:
+        syncOptions:
+        - CreateNamespace=true
+EOF
+#+end_src
+
+#+RESULTS:
+: applicationset.argoproj.io/edge-robotics-pipeline configured
 
 
 * Teardown
