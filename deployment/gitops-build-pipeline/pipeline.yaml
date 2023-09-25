@@ -5,7 +5,7 @@ metadata:
   name: model-pipeline
   namespace: edge-robotics
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/hook: PostSync
 spec:
   tasks:
     - name: git-clone

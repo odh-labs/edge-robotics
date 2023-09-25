@@ -112,7 +112,7 @@ EOF
 #+end_src
 
 #+RESULTS:
-: argocd.argoproj.io/openshift-gitops created
+: argocd.argoproj.io/openshift-gitops configured
 
 
 * Apply openshift gitops application
@@ -142,6 +142,7 @@ spec:
       prune: false
     syncOptions:
       - CreateNamespace=true
+      - Validate=false
 EOF
 #+end_src
 
@@ -153,9 +154,24 @@ EOF
 
 Finished with the demo environment and want to remove all edge robotics content from the cluster? No problem, just run the section below:
 
-#+begin_src bash :results silent
-oc --namespace openshift-gitops delete --ignore-not-found=true application  edge-robotics
-oc --namespace openshift-gitops delete --ignore-not-found=true argocd openshift-gitops
-oc --namespace openshift-operators delete --ignore-not-found=true subscription openshift-gitops-operator openshift-pipelines-operator
-oc delete --ignore-not-found=true project edge-robotics
+#+begin_src bash :results output
+# Identify the csv resource names
+export gitopscsv=$(oc --namespace openshift-operators get subscription openshift-gitops-operator --output yaml | grep currentCSV)
+export tektoncsv=$(oc --namespace openshift-operators get subscription openshift-pipelines-operator --output yaml | grep currentCSV)
+
+# Delete the operator subscriptions
+oc --namespace openshift-operators delete --ignore-not-found=true subscription openshift-gitops-operator
+oc --namespace openshift-operators delete --ignore-not-found=true subscription  openshift-pipelines-operator
+
+# Delete the operator clusterserviceversion
+oc --namespace openshift-operators delete clusterserviceversion "${gitopscsv}"
+oc --namespace openshift-operators delete clusterserviceversion "${tektoncsv}"
+
+# Delete the projects
+oc delete --ignore-not-found=true project edge-robotics openshift-gitops openshift-pipelines
 #+end_src
+
+#+RESULTS:
+: project.project.openshift.io "edge-robotics" deleted
+: project.project.openshift.io "openshift-gitops" deleted
+: project.project.openshift.io "openshift-pipelines" deleted
