@@ -32,7 +32,7 @@ The goal of this setup process is to be as declarative as possible. With this in
 
 We can programatically install the openshift gitops operator in a declaritive way by creating a ~Subscription~ kubernetes custom resource to subscribe a given namespace to the Operator.
 
-#+begin_src bash :results output
+#+begin_src bash :results silent
 cat << EOF | oc apply --filename -
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
@@ -48,9 +48,6 @@ spec:
 EOF
 #+end_src
 
-#+RESULTS:
-: subscription.operators.coreos.com/openshift-gitops-operator created
-
 
 ** Create openshift gitops instance
 
@@ -58,7 +55,7 @@ Once the operator is installed we can apply our ~ArgoCD~ custom resource definit
 
 Before creating the custom resource let's ensure argocd will be able to fully manage our cluster by giving it the ~cluster-admin~ role.
 
-#+begin_src bash
+#+begin_src bash :results silent
 cat << EOF | oc apply --filename -
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -75,10 +72,8 @@ roleRef:
 EOF
 #+end_src
 
-#+RESULTS:
-: clusterrolebinding.rbac.authorization.k8s.io/argocd-rbac-ca created
 
-#+begin_src bash :results output
+#+begin_src bash :results silent
 cat << EOF | oc apply --filename -
 apiVersion: argoproj.io/v1alpha1
 kind: ArgoCD
@@ -111,43 +106,21 @@ spec:
 EOF
 #+end_src
 
-#+RESULTS:
-: argocd.argoproj.io/openshift-gitops configured
+
+Once the argocd instance has started we can access the web interface via the ~Route~ automatically created by the Operator.
+
+#+begin_src bash :results silent
+xdg-open "https://$(oc --namespace openshift-gitops get route openshift-gitops-server --output jsonpath='{.spec.host}')"
+#+end_src
 
 
 * Apply openshift gitops application
 
-From here, with openshift gitops running, all we need to do is apply the argocd ~Application~ custom resource, which points to a git repository containing our remaining manifests.
+From here, with openshift gitops running, all we need to do is apply the argocd ~ApplicationSet~ custom resource shown below, which points to a git repository containing our remaining manifests.
 
-This ~Application~ resource will be picked up by ArgoCD and periodically synchronised to our cluster.
+This ~ApplicationSet~ resource will be picked up by ArgoCD and periodically synchronised to our cluster to create an ~Application~ for the openshift pipelines operator as well as the actual pipeline which uses that operator.
 
-#+begin_src bash :results output
-cat << EOF | oc apply --filename -
-apiVersion: argoproj.io/v1alpha1
-kind: ApplicationSet
-metadata:
-  name: edge-robotics-pipeline
-  namespace: openshift-gitops
-spec:
-  project: default
-  source:
-    repoURL: https://github.com/jmhbnz/edge-robotics.git
-    targetRevision: automate-pipeline-creation
-    path: deployment/gitops-pipelines-operator
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: edge-robotics
-  syncPolicy:
-    syncOptions:
-      - CreateNamespace=true
-EOF
-#+end_src
-
-#+RESULTS:
-: application.argoproj.io/edge-robotics-pipeline created
-
-
-#+begin_src bash :results output
+#+begin_src bash :results silent
 cat << EOF | oc apply --filename -
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
@@ -170,29 +143,33 @@ spec:
       project: "default"
       source:
         repoURL: https://github.com/jmhbnz/edge-robotics.git
-        targetRevision: HEAD
+        targetRevision: automate-pipeline-creation
         path: '{{.path.path}}'
       destination:
         server: https://kubernetes.default.svc
         namespace: edge-robotics
       syncPolicy:
+        automated:
+          prune: true
         syncOptions:
-        - CreateNamespace=true
+          - CreateNamespace=true
 EOF
 #+end_src
-
-#+RESULTS:
-: applicationset.argoproj.io/edge-robotics-pipeline configured
 
 
 * Teardown
 
 Finished with the demo environment and want to remove all edge robotics content from the cluster? No problem, just run the section below:
 
-#+begin_src bash :results output
-# Identify the csv resource names
-export gitopscsv=$(oc --namespace openshift-operators get subscription openshift-gitops-operator --output yaml | grep currentCSV)
-export tektoncsv=$(oc --namespace openshift-operators get subscription openshift-pipelines-operator --output yaml | grep currentCSV)
+#+begin_src bash :results silent
+# Delete applicationset
+oc --namespace openshift-gitops delete applicationset edge-robotics-pipeline
+
+# Delete argocd
+oc --namespace openshift-gitops delete argocd openshift-gitops
+            # Identify the csv resource names
+export gitopscsv=$(oc --namespace openshift-operators get subscription openshift-gitops-operator --output yaml | grep currentCSV | awk '{print $2}')
+export tektoncsv=$(oc --namespace openshift-operators get subscription openshift-pipelines-operator --output yaml | grep currentCSV | awk '{print $2}')
 
 # Delete the operator subscriptions
 oc --namespace openshift-operators delete --ignore-not-found=true subscription openshift-gitops-operator
@@ -206,7 +183,3 @@ oc --namespace openshift-operators delete clusterserviceversion "${tektoncsv}"
 oc delete --ignore-not-found=true project edge-robotics openshift-gitops openshift-pipelines
 #+end_src
 
-#+RESULTS:
-: project.project.openshift.io "edge-robotics" deleted
-: project.project.openshift.io "openshift-gitops" deleted
-: project.project.openshift.io "openshift-pipelines" deleted
