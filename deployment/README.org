@@ -157,6 +157,22 @@ EOF
 #+end_src
 
 
+* Patch quay.io secret
+
+Our pipeline relies on a secret containing credentials to authenticate and push an image to ~quay.io~.
+
+The version of the secret stored in this repository under ~gitops-pipeline/secret.yaml~ just has a "placeholder" value. So run the snippet below to patch it with a value from environment.
+
+#+begin_src bash :results output
+sed -i "s/aGVsbG93b3JsZAo=/$(echo ${QUAY_USER} | base64)/g" gitops-pipeline/secret.yaml
+sed -i "s/cGxhY2Vob2xkZXIyCg==/$(echo ${QUAY_PASS} | base64)/g" gitops-pipeline/secret.yaml
+oc apply --namespace edge-robotics --filename gitops-pipeline/secret.yaml
+#+end_src
+
+#+RESULTS:
+
+
+
 * Teardown
 
 Finished with the demo environment and want to remove all edge robotics content from the cluster? No problem, just run the section below:
@@ -167,7 +183,8 @@ oc --namespace openshift-gitops delete applicationset edge-robotics-pipeline
 
 # Delete argocd
 oc --namespace openshift-gitops delete argocd openshift-gitops
-            # Identify the csv resource names
+
+# Identify the csv resource names
 export gitopscsv=$(oc --namespace openshift-operators get subscription openshift-gitops-operator --output yaml | grep currentCSV | awk '{print $2}')
 export tektoncsv=$(oc --namespace openshift-operators get subscription openshift-pipelines-operator --output yaml | grep currentCSV | awk '{print $2}')
 
