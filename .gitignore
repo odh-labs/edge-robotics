@@ -1,3 +1,4 @@
 .DS_Store
 target
 rough
+deployment/quay.yaml

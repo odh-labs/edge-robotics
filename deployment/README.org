@@ -163,10 +163,11 @@ Our pipeline relies on a secret containing credentials to authenticate and push 
 
 The version of the secret stored in this repository under ~gitops-pipeline/secret.yaml~ just has a "placeholder" value. So run the snippet below to patch it with a value from environment.
 
-#+begin_src bash :results output
-sed -i "s/aGVsbG93b3JsZAo=/$(echo ${QUAY_USER} | base64)/g" gitops-pipeline/secret.yaml
-sed -i "s/cGxhY2Vob2xkZXIyCg==/$(echo ${QUAY_PASS} | base64)/g" gitops-pipeline/secret.yaml
-oc apply --namespace edge-robotics --filename gitops-pipeline/secret.yaml
+#+begin_src bash :results outputa
+cp secret.yaml quay.yaml
+sed -i "s/aGVsbG93b3JsZAo=/$(echo ${QUAY_USER} | base64)/g" gitops-pipeline/quay.yaml
+sed -i "s/cGxhY2Vob2xkZXIyCg==/$(echo ${QUAY_PASS} | base64)/g" gitops-pipeline/quay.yaml
+oc apply --namespace edge-robotics --filename gitops-pipeline/quay.yaml
 #+end_src
 
 #+RESULTS:
