@@ -131,19 +131,19 @@ spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]
   generators:
-  - git:
-      repoURL: https://github.com/jmhbnz/edge-robotics.git
-      revision: automate-pipeline-creation
-      directories:
-      - path: deployment/gitops*
+    - git:
+        repoURL: https://github.com/odh-labs/edge-robotics.git
+        revision: main
+        directories:
+          - path: deployment/gitops*
   template:
     metadata:
       name: '{{.path.basename}}'
     spec:
       project: "default"
       source:
-        repoURL: https://github.com/jmhbnz/edge-robotics.git
-        targetRevision: automate-pipeline-creation
+        repoURL: https://github.com/odh-labs/edge-robotics.git
+        targetRevision: main
         path: '{{.path.path}}'
       destination:
         server: https://kubernetes.default.svc
@@ -157,21 +157,30 @@ EOF
 #+end_src
 
 
-* Patch quay.io secret
+* Create quay.io secret
 
 Our pipeline relies on a secret containing credentials to authenticate and push an image to ~quay.io~.
 
-The version of the secret stored in this repository under ~gitops-pipeline/secret.yaml~ just has a "placeholder" value. So run the snippet below to patch it with a value from environment.
+Run the snippet below to create a secret for your quay.io credentials.
 
-#+begin_src bash :results outputa
-cp secret.yaml quay.yaml
-sed -i "s/aGVsbG93b3JsZAo=/$(echo ${QUAY_USER} | base64)/g" gitops-pipeline/quay.yaml
-sed -i "s/cGxhY2Vob2xkZXIyCg==/$(echo ${QUAY_PASS} | base64)/g" gitops-pipeline/quay.yaml
-oc apply --namespace edge-robotics --filename gitops-pipeline/quay.yaml
+#+begin_src bash :results silent
+export QUAY_USER=user_placeholder
+export QUAY_PASS=pass_placeholder
+
+envsubst cat << EOF | oc apply --filename -
+apiVersion: v1
+stringData:
+  username: $QUAY_USER
+  password: $QUAY_PASS
+kind: Secret
+metadata:
+  name: push-secret
+  namespace: edge-robotics
+  annotations:
+    tekton.dev/docker-0: https://quay.io
+type: kubernetes.io/basic-auth
+EOF
 #+end_src
-
-#+RESULTS:
-
 
 
 * Teardown
@@ -182,22 +191,7 @@ Finished with the demo environment and want to remove all edge robotics content 
 # Delete applicationset
 oc --namespace openshift-gitops delete applicationset edge-robotics-pipeline
 
-# Delete argocd
-oc --namespace openshift-gitops delete argocd openshift-gitops
-
-# Identify the csv resource names
-export gitopscsv=$(oc --namespace openshift-operators get subscription openshift-gitops-operator --output yaml | grep currentCSV | awk '{print $2}')
-export tektoncsv=$(oc --namespace openshift-operators get subscription openshift-pipelines-operator --output yaml | grep currentCSV | awk '{print $2}')
-
-# Delete the operator subscriptions
-oc --namespace openshift-operators delete --ignore-not-found=true subscription openshift-gitops-operator
-oc --namespace openshift-operators delete --ignore-not-found=true subscription  openshift-pipelines-operator
-
-# Delete the operator clusterserviceversion
-oc --namespace openshift-operators delete clusterserviceversion "${gitopscsv}"
-oc --namespace openshift-operators delete clusterserviceversion "${tektoncsv}"
-
-# Delete the projects
-oc delete --ignore-not-found=true project edge-robotics openshift-gitops openshift-pipelines
+# Delete the project
+oc delete --ignore-not-found=true project edge-robotics
 #+end_src
 
