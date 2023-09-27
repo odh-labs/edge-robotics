@@ -1,8 +1,8 @@
-FROM image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/pytorch:2023.1
+FROM quay.io/opendatahub/workbench-images:jupyter-pytorch-ubi8-python-3.8-2023a-20230925
 
 USER root
 
-RUN dnf install mesa-lib-GLU
+RUN dnf install -y mesa-libGL
 
 USER 1001
 
