@@ -1,0 +1,197 @@
+#+TITLE: Edge Robotics AI/ML Demo Environment Setup
+#+EMAIL: jablair@redhat.com
+#+AUTHOR: James Blair
+#+DATE: <2023-09-15 Fri 14:00>
+
+
+This document captures the process for setting up a new Red Hat ANZ edge robotics [[https://www.redhat.com/en/openshift-4][OpenShift 4]] "hub" cluster.
+
+These clusters are where:
+
+  - Models are trained using [[https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-data-science][Red Hat OpenShift Data Science]].
+  - Models are containerised using [[https://cloud.redhat.com/blog/introducing-openshift-pipelins][Red Hat OpenShift Pipelines]].
+
+The diagram below outlines the general flow for edge robotics demo environments:
+
+[[../images/model-flow-diagram.svg]]
+
+
+* Pre-requisites
+
+This process assumes you already have an OpenShift 4.12+ cluster running, and that you have cluster admin privileges.
+
+The steps below also rely on the ~oc~ openshift cli so ensure you have that installed as well. If you don't have this installed already follow [[https://docs.openshift.com/container-platform/4.12/cli_reference/openshift_cli/getting-started-cli.html][this install documentation]].
+
+
+* Deploying openshift gitops
+
+The goal of this setup process is to be as declarative as possible. With this in mind our first step on the new cluster will be to install the [[https://www.redhat.com/en/technologies/cloud-computing/openshift/gitops][OpenShift Gitops]] operator and creating an instance of [[https://argoproj.github.io/cd/][ArgoCD]] via the operator so that all remaining steps can be performed in a GitOps manner.
+
+
+** Install openshift gitops operator
+
+We can programatically install the openshift gitops operator in a declaritive way by creating a ~Subscription~ kubernetes custom resource to subscribe a given namespace to the Operator.
+
+#+begin_src bash :results silent
+cat << EOF | oc apply --filename -
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: openshift-gitops-operator
+  namespace: openshift-operators
+spec:
+  channel: latest
+  installPlanApproval: Automatic
+  name: openshift-gitops-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+EOF
+#+end_src
+
+
+** Create openshift gitops instance
+
+Once the operator is installed we can apply our ~ArgoCD~ custom resource definition. This will be picked up by the operator and a new argocd instance will be deployed based on the specification we provided.
+
+Before creating the custom resource let's ensure argocd will be able to fully manage our cluster by giving it the ~cluster-admin~ role.
+
+#+begin_src bash :results silent
+cat << EOF | oc apply --filename -
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: argocd-rbac-ca
+subjects:
+  - kind: ServiceAccount
+    name: openshift-gitops-argocd-application-controller
+    namespace: openshift-gitops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+EOF
+#+end_src
+
+
+#+begin_src bash :results silent
+cat << EOF | oc apply --filename -
+apiVersion: argoproj.io/v1alpha1
+kind: ArgoCD
+metadata:
+  name: openshift-gitops
+  namespace: openshift-gitops
+spec:
+  kustomizeBuildOptions: --enable-helm --enable-alpha-plugins
+  rbac:
+    defaultPolicy: role:admin
+    policy: |
+      g, system:cluster-admins, role:admin
+      g, cluster-admins, role:admin
+    scopes: '[groups]'
+  resourceExclusions: |
+    - kinds:
+        - TaskRun
+        - PipelineRun
+  server:
+    insecure: true
+    route:
+      enabled: true
+      tls:
+        insecureEdgeTerminationPolicy: Redirect
+        termination: edge
+  sso:
+    dex:
+      openShiftOAuth: true
+    provider: dex
+EOF
+#+end_src
+
+
+Once the argocd instance has started we can access the web interface via the ~Route~ automatically created by the Operator.
+
+#+begin_src bash :results silent
+xdg-open "https://$(oc --namespace openshift-gitops get route openshift-gitops-server --output jsonpath='{.spec.host}')"
+#+end_src
+
+
+* Apply openshift gitops application
+
+From here, with openshift gitops running, all we need to do is apply the argocd ~ApplicationSet~ custom resource shown below, which points to a git repository containing our remaining manifests.
+
+This ~ApplicationSet~ resource will be picked up by ArgoCD and periodically synchronised to our cluster to create an ~Application~ for the openshift pipelines operator as well as the actual pipeline which uses that operator.
+
+#+begin_src bash :results silent
+cat << EOF | oc apply --filename -
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: edge-robotics-pipeline
+  namespace: openshift-gitops
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/odh-labs/edge-robotics.git
+        revision: main
+        directories:
+          - path: deployment/gitops*
+  template:
+    metadata:
+      name: '{{.path.basename}}'
+    spec:
+      project: "default"
+      source:
+        repoURL: https://github.com/odh-labs/edge-robotics.git
+        targetRevision: main
+        path: '{{.path.path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: edge-robotics
+      syncPolicy:
+        automated:
+          prune: true
+        syncOptions:
+          - CreateNamespace=true
+EOF
+#+end_src
+
+
+* Create quay.io secret
+
+Our pipeline relies on a secret containing credentials to authenticate and push an image to ~quay.io~.
+
+Run the snippet below to create a secret for your quay.io credentials.
+
+#+begin_src bash :results silent
+export QUAY_USER=user_placeholder
+export QUAY_PASS=pass_placeholder
+
+envsubst cat << EOF | oc apply --filename -
+apiVersion: v1
+stringData:
+  username: $QUAY_USER
+  password: $QUAY_PASS
+kind: Secret
+metadata:
+  name: push-secret
+  namespace: edge-robotics
+  annotations:
+    tekton.dev/docker-0: https://quay.io
+type: kubernetes.io/basic-auth
+EOF
+#+end_src
+
+
+* Teardown
+
+Finished with the demo environment and want to remove all edge robotics content from the cluster? No problem, just run the section below:
+
+#+begin_src bash :results silent
+# Delete applicationset
+oc --namespace openshift-gitops delete applicationset edge-robotics-pipeline
+
+# Delete the project
+oc delete --ignore-not-found=true project edge-robotics
+#+end_src
+
