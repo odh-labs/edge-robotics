@@ -58,7 +58,7 @@ spec:
       seLinuxOptions: {}
     workingDir: /app
   - command:
-    - /mediamtx
+    #- /mediamtx
     env:
     - name: PATH
       value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
@@ -131,17 +131,17 @@ spec:
     nodePort: 30854
     port: 8554
     protocol: TCP
-    targetPort: 0
+    targetPort: 8554
   - name: "5000"
     nodePort: 30500
     port: 5000
     protocol: TCP
-    targetPort: 0
+    targetPort: 5000
   - name: "5005"
     nodePort: 30505
     port: 5005
     protocol: TCP
-    targetPort: 0
+    targetPort: 5005
   selector:
     app: edge-demo-pod
   type: NodePort
