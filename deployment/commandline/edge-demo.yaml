@@ -35,22 +35,22 @@ spec:
     name: edge-server
     ports:
     - containerPort: 8554
-      hostPort: 8554
+      #hostPort: 8554
       protocol: TCP
     - containerPort: 5000
-      hostPort: 5000
+      #hostPort: 5000
       protocol: TCP
     - containerPort: 5005
-      hostPort: 5005
+      #hostPort: 5005
       protocol: TCP
     resources: {}
     securityContext:
-      allowPrivilegeEscalation: true
+      seccompProfile:
+        type: RuntimeDefault
+      allowPrivilegeEscalation: false
       capabilities:
         drop:
-        - CAP_MKNOD
-        - CAP_NET_RAW
-        - CAP_AUDIT_WRITE
+        - ALL
       privileged: false
       readOnlyRootFilesystem: false
       runAsGroup: 1000
@@ -72,12 +72,12 @@ spec:
     name: rtsp
     resources: {}
     securityContext:
-      allowPrivilegeEscalation: true
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
       capabilities:
         drop:
-        - CAP_MKNOD
-        - CAP_NET_RAW
-        - CAP_AUDIT_WRITE
+        - ALL
       privileged: false
       readOnlyRootFilesystem: false
       runAsGroup: 1000
@@ -102,12 +102,12 @@ spec:
     name: yolo
     resources: {}
     securityContext:
-      allowPrivilegeEscalation: true
+      seccompProfile:
+        type: RuntimeDefault
+      allowPrivilegeEscalation: false
       capabilities:
         drop:
-        - CAP_MKNOD
-        - CAP_NET_RAW
-        - CAP_AUDIT_WRITE
+        - ALL
       privileged: false
       readOnlyRootFilesystem: false
       runAsGroup: 1000
