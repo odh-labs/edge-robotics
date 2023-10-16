@@ -5,11 +5,20 @@ metadata:
   name: model-pipeline
   namespace: edge-robotics
 spec:
+  params:
+    - name: QUAY_USER
+      type: string
+      description: The quay.io username to push model image to.
+      default: placeholder
+    - name: MODEL_REPOSITORY
+      type: string
+      description: The git respository clone url containing model content.
+      default: https://github.com/tnscorcoran/GuiseAI-Openshift
   tasks:
     - name: git-clone
       params:
       - name: url
-        value: https://github.com/tnscorcoran/GuiseAI-Openshift
+        value: "$(params.MODEL_REPOSITORY)"
       - name: revision
         value: ""
       - name: refspec
@@ -49,7 +58,7 @@ spec:
     - name: buildah
       params:
       - name: IMAGE
-        value: quay.io/tcorcoran/guise-model
+        value: "quay.io/$(params.QUAY_USER)/guise-model"
       - name: BUILDER_IMAGE
         value: registry.redhat.io/rhel8/buildah
       - name: STORAGE_DRIVER
