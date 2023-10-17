@@ -1,0 +1,26 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: model-pipeline-initial
+  namespace: edge-robotics
+spec:
+  params:
+    - name: QUAY_USER
+      value: tcorcoran
+    - name: MODEL_REPOSITORY
+      value: https://github.com/tnscorcoran/GuiseAI-Openshift
+  pipelineRef:
+    name: model-pipeline
+  serviceAccountName: pipeline
+  timeouts:
+    pipeline: 1h0m0s
+  workspaces:
+    - name: Model Workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+          volumeMode: Filesystem

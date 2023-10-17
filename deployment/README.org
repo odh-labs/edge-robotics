@@ -109,7 +109,6 @@ spec:
   resourceExclusions: |
     - kinds:
         - TaskRun
-        - PipelineRun
   server:
     insecure: true
     route:
@@ -129,6 +128,35 @@ Once the argocd instance has started we can access the web interface via the ~Ro
 
 #+begin_src bash :results silent
 xdg-open "https://$(oc --kubeconfig ~/.kube/edge-robotics-hub --namespace openshift-gitops get route openshift-gitops-server --output jsonpath='{.spec.host}')"
+#+end_src
+
+
+** Create tekton pipeline quay.io secret
+
+Our model containerisation pipeline on the hub cluster relies on a secret containing credentials to authenticate and push an image to ~quay.io~.
+
+Run the snippet below to create a secret for your quay.io credentials, so we have everything in place to kick off our pipeline.
+
+#+begin_src bash :results silent
+read -p "Enter Quay.io username: "    QUAY_USER && export QUAY_USER
+read -p "Enter Quay.io password: " -s QUAY_PASS && export QUAY_PASS
+
+# Ensure the namespace exists
+oc --kubeconfig ~/.kube/edge-robotics-hub new-project edge-robotics
+
+cat << EOF | oc --kubeconfig ~/.kube/edge-robotics-hub apply --filename -
+apiVersion: v1
+stringData:
+  username: $(echo ${QUAY_USER:-placeholder})
+  password: $(echo ${QUAY_PASS:-placeholder})
+kind: Secret
+metadata:
+  name: push-secret
+  namespace: edge-robotics
+  annotations:
+    tekton.dev/docker-0: https://quay.io
+type: kubernetes.io/basic-auth
+EOF
 #+end_src
 
 
@@ -175,72 +203,6 @@ EOF
 #+end_src
 
 
-** Create tekton pipeline quay.io secret
-
-Our model containerisation pipeline on the hub cluster relies on a secret containing credentials to authenticate and push an image to ~quay.io~.
-
-Run the snippet below to create a secret for your quay.io credentials.
-
-#+begin_src bash :results silent
-read -p "Enter Quay.io username: "    QUAY_USER && export QUAY_USER
-read -p "Enter Quay.io password: " -s QUAY_PASS && export QUAY_PASS
-
-cat << EOF | oc --kubeconfig ~/.kube/edge-robotics-hub apply --filename -
-apiVersion: v1
-stringData:
-  username: $(echo ${QUAY_USER:-placeholder})
-  password: $(echo ${QUAY_PASS:-placeholder})
-kind: Secret
-metadata:
-  name: push-secret
-  namespace: edge-robotics
-  annotations:
-    tekton.dev/docker-0: https://quay.io
-type: kubernetes.io/basic-auth
-EOF
-#+end_src
-
-
-** Run tekton pipeline to containerise model
-
-Once the required secret exists secret exists in our hub cluster we can start our image build pipeline that will clone a git repository containing our model, build the image with ~buildah~ and push the image to the provided ~quay.io~ username and repository.
-
-Note: Ensure the ~quay.io~ repository is set to "public" if you encounter the ~Error: pushing image "quay.io/<username>/guise-model" to "docker://quay.io/<username>/guise-model": writing blob: initiating layer upload to /v2/<username>/guise-model/blobs/uploads/ in quay.io: unauthorized: access to the requested resource is not authorized~ error message.
-
-#+begin_src bash :results silent
-export QUAY_USER=$(oc --kubeconfig ~/.kube/edge-robotics-hub get secret --namespace edge-robotics push-secret --output jsonpath='{.data.username}' | base64 --decode)
-
-envsubst cat << EOF | oc --kubeconfig ~/.kube/edge-robotics-hub apply --filename -
-apiVersion: tekton.dev/v1beta1
-kind: PipelineRun
-metadata:
-  name: model-pipeline-initial
-  namespace: edge-robotics
-spec:
-  params:
-    - name: QUAY_USER
-      value: $QUAY_USER
-    - name: MODEL_REPOSITORY
-      value: 'https://github.com/tnscorcoran/GuiseAI-Openshift'
-  pipelineRef:
-    name: model-pipeline
-  serviceAccountName: pipeline
-  timeouts:
-    pipeline: 1h0m0s
-  workspaces:
-    - name: Model Workspace
-      volumeClaimTemplate:
-        spec:
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: 1Gi
-          volumeMode: Filesystem
-EOF
-#+end_src
-
-
 * Stage 2 - Deploy model to edge cluster
 
 We now have a model built into a container image and pushed to ~quay.io~.  Let's get logged into our edge cluster and deploy the model via argocd.
@@ -260,16 +222,17 @@ oc login --token=<token> \
 
 ** Register remote cluster with hub argocd
 
-Once we are authenticated against both clusters we can run the sequence of commands below to onboard the edge device cluster into our hub cluster argocd instance. This involves temporarily copying our edge device cluster kubeconfig file (~/.kube/edge-robotics-device~) into the ~openshift-gitops-server~ pod of our hub cluster then ~exec~ into that hub cluster pod to run ~argocd login~ followed by ~argocd cluster add~.
+Once we are authenticated against both clusters we can run the sequence of commands below to onboard the edge device cluster into our hub cluster argocd instance.
+
+This involves:
+
+1. temporarily copying our edge device cluster kubeconfig file (~/.kube/edge-robotics-device~) into the ~openshift-gitops-server~ pod of our hub cluster.
+2. ~exec~ into that hub cluster argocd pod to run ~argocd login~ followed by ~argocd cluster add~.
 
 #+begin_src bash :results silent
-# Retrieve the name of the argocd server pod
+# Retrieve the name of the argocd server pod, argocd admin password, and remote edge cluster kubeconfig context
 export gitops_pod=$(oc --kubeconfig ~/.kube/edge-robotics-hub get pods --namespace openshift-gitops --output name --no-headers=true | grep openshift-gitops-server | sed 's/^.\{4\}//')
-
-# Retrieve the argocd admin password from secret
 export gitops_pass=$(oc --kubeconfig ~/.kube/edge-robotics-hub get secret --namespace openshift-gitops openshift-gitops-cluster -o jsonpath={.data.admin\\.password} | base64 --decode)
-
-# Retrieve the remote cluster kubeconfig context
 export remote_context=$(oc --kubeconfig ~/.kube/edge-robotics-device config get-contexts --output name | grep default)
 
 # Run the login command using argocd cli inside pod
