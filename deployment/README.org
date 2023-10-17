@@ -178,7 +178,7 @@ spec:
   goTemplateOptions: ["missingkey=error"]
   generators:
     - git:
-        repoURL: https://github.com/jmhbnz/edge-robotics.git
+        repoURL: https://github.com/odh-labs/edge-robotics.git
         revision: main
         directories:
           - path: deployment/gitops*
@@ -188,7 +188,7 @@ spec:
     spec:
       project: "default"
       source:
-        repoURL: https://github.com/jmhbnz/edge-robotics.git
+        repoURL: https://github.com/odh-labs/edge-robotics.git
         targetRevision: main
         path: '{{.path.path}}'
       destination:
@@ -247,6 +247,9 @@ oc --kubeconfig ~/.kube/edge-robotics-hub --namespace openshift-gitops exec "${g
 # Clean up the temporary files created
 oc --kubeconfig ~/.kube/edge-robotics-hub --namespace openshift-gitops exec "${gitops_pod}" -- rm /tmp/config /tmp/kubeconfig
 #+end_src
+
+
+Congratulations! After following through the process up to this point, following a brief wait for ArgoCD to sync you should now see an edge robotics ~namespace~ and ~pod~ deployed to the remote edge device cluster 🎉🚀
 
 
 * Teardown
