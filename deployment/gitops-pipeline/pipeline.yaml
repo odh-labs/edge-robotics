@@ -5,76 +5,43 @@ metadata:
   name: model-pipeline
   namespace: edge-robotics
 spec:
+  params:
+    - name: QUAY_USER
+      type: string
+      description: The quay.io username the image will be pushed to.
+      default: tcorcoran
+    - name: MODEL_REPOSITORY
+      type: string
+      description: The git respository clone url containing model content.
+      default: https://github.com/tnscorcoran/GuiseAI-Openshift
   tasks:
     - name: git-clone
       params:
-      - name: url
-        value: https://github.com/tnscorcoran/GuiseAI-Openshift
-      - name: revision
-        value: ""
-      - name: refspec
-        value: ""
-      - name: submodules
-        value: "true"
-      - name: depth
-        value: "1"
-      - name: sslVerify
-        value: "true"
-      - name: crtFileName
-        value: ca-bundle.crt
-      - name: subdirectory
-        value: ""
-      - name: sparseCheckoutDirectories
-        value: ""
-      - name: deleteExisting
-        value: "true"
-      - name: httpProxy
-        value: ""
-      - name: httpsProxy
-        value: ""
-      - name: noProxy
-        value: ""
-      - name: verbose
-        value: "true"
-      - name: gitInitImage
-        value: registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:429ba9c10dfcff4ee0154ab75f9bd06fd306f019c0ed0b062ba7c03e56e3e33b
-      - name: userHome
-        value: /home/git
+        - name: url
+          value: "$(params.MODEL_REPOSITORY)"
+        - name: revision
+          value: ""
       taskRef:
         kind: ClusterTask
         name: git-clone
       workspaces:
-      - name: output
-        workspace: Model Workspace
+        - name: output
+          workspace: Model Workspace
     - name: buildah
       params:
-      - name: IMAGE
-        value: quay.io/tcorcoran/guise-model
-      - name: BUILDER_IMAGE
-        value: registry.redhat.io/rhel8/buildah
-      - name: STORAGE_DRIVER
-        value: vfs
-      - name: DOCKERFILE
-        value: ./Dockerfile
-      - name: CONTEXT
-        value: .
-      - name: TLSVERIFY
-        value: "true"
-      - name: FORMAT
-        value: oci
-      - name: BUILD_EXTRA_ARGS
-        value: ""
-      - name: PUSH_EXTRA_ARGS
-        value: ""
-      - name: SKIP_PUSH
-        value: "false"
+        - name: IMAGE
+          value: "quay.io/$(params.QUAY_USER)/guise-model"
+        - name: DOCKERFILE
+          value: ./Dockerfile
+        - name: CONTEXT
+          value: .
       runAfter:
-      - git-clone
+        - git-clone
       taskRef:
         kind: ClusterTask
         name: buildah
       workspaces:
-      - name: source
-        workspace: Model Workspace
+        - name: source
+          workspace: Model Workspace
   workspaces:
     - name: Model Workspace

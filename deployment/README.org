@@ -4,12 +4,16 @@
 #+DATE: <2023-09-15 Fri 14:00>
 
 
-This document captures the process for setting up a new Red Hat ANZ edge robotics [[https://www.redhat.com/en/openshift-4][OpenShift 4]] "hub" cluster.
+This document captures the process for setting up a new Red Hat ANZ edge robotics [[https://www.redhat.com/en/openshift-4][OpenShift 4]] "hub" cluster along with a corresponding "edge" cluster.
 
-These clusters are where:
+The hub cluster is where:
 
-  - Models are trained using [[https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-data-science][Red Hat OpenShift Data Science]].
-  - Models are containerised using [[https://cloud.redhat.com/blog/introducing-openshift-pipelins][Red Hat OpenShift Pipelines]].
+- Models are trained using [[https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-data-science][Red Hat OpenShift Data Science]].
+- Models are containerised using [[https://cloud.redhat.com/blog/introducing-openshift-pipelins][Red Hat OpenShift Pipelines]].
+
+The edge cluster is where:
+
+- Models will run (pushed from ArgoCD in the hub).
 
 The diagram below outlines the general flow for edge robotics demo environments:
 
@@ -18,22 +22,36 @@ The diagram below outlines the general flow for edge robotics demo environments:
 
 * Pre-requisites
 
-This process assumes you already have an OpenShift 4.12+ cluster running, and that you have cluster admin privileges.
+This process assumes you already have two OpenShift 4.12+ clusters running, and that you have cluster admin privileges on both.
 
 The steps below also rely on the ~oc~ openshift cli so ensure you have that installed as well. If you don't have this installed already follow [[https://docs.openshift.com/container-platform/4.12/cli_reference/openshift_cli/getting-started-cli.html][this install documentation]].
 
 
-* Deploying openshift gitops
-
-The goal of this setup process is to be as declarative as possible. With this in mind our first step on the new cluster will be to install the [[https://www.redhat.com/en/technologies/cloud-computing/openshift/gitops][OpenShift Gitops]] operator and creating an instance of [[https://argoproj.github.io/cd/][ArgoCD]] via the operator so that all remaining steps can be performed in a GitOps manner.
+* Stage 1 - Containerise model on hub cluster
 
 
-** Install openshift gitops operator
+** Deploying openshift gitops
 
-We can programatically install the openshift gitops operator in a declaritive way by creating a ~Subscription~ kubernetes custom resource to subscribe a given namespace to the Operator.
+The goal of this setup process is to be as declarative as possible. With this in mind our first step on the new hub cluster will be to install the [[https://www.redhat.com/en/technologies/cloud-computing/openshift/gitops][OpenShift Gitops]] operator and create an instance of [[https://argoproj.github.io/cd/][ArgoCD]] via the operator, so that all remaining steps can be performed in a GitOps manner.
+
+
+*** Login to the hub cluster
+
+Before we can run any of the following commands, we need to ensure we are logged in. Run the following to do so, updating the placeholder values:
 
 #+begin_src bash :results silent
-cat << EOF | oc apply --filename -
+oc login --token=<token> \
+         --server=<cluster> \
+         --kubeconfig ~/.kube/edge-robotics-hub \
+         --insecure-skip-tls-verify=true
+#+end_src
+
+*** Install openshift gitops operator
+
+We can programatically install the openshift gitops operator on the hub cluster in a declaritive way by creating a ~Subscription~ kubernetes custom resource to subscribe a given namespace to the Operator.
+
+#+begin_src bash :results silent
+cat << EOF | oc --kubeconfig ~/.kube/edge-robotics-hub apply --filename -
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
@@ -49,14 +67,14 @@ EOF
 #+end_src
 
 
-** Create openshift gitops instance
+*** Create openshift gitops instance
 
 Once the operator is installed we can apply our ~ArgoCD~ custom resource definition. This will be picked up by the operator and a new argocd instance will be deployed based on the specification we provided.
 
 Before creating the custom resource let's ensure argocd will be able to fully manage our cluster by giving it the ~cluster-admin~ role.
 
 #+begin_src bash :results silent
-cat << EOF | oc apply --filename -
+cat << EOF | oc --kubeconfig ~/.kube/edge-robotics-hub apply --filename -
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -74,7 +92,7 @@ EOF
 
 
 #+begin_src bash :results silent
-cat << EOF | oc apply --filename -
+cat << EOF | oc --kubeconfig ~/.kube/edge-robotics-hub apply --filename -
 apiVersion: argoproj.io/v1alpha1
 kind: ArgoCD
 metadata:
@@ -91,7 +109,6 @@ spec:
   resourceExclusions: |
     - kinds:
         - TaskRun
-        - PipelineRun
   server:
     insecure: true
     route:
@@ -110,18 +127,47 @@ EOF
 Once the argocd instance has started we can access the web interface via the ~Route~ automatically created by the Operator.
 
 #+begin_src bash :results silent
-xdg-open "https://$(oc --namespace openshift-gitops get route openshift-gitops-server --output jsonpath='{.spec.host}')"
+xdg-open "https://$(oc --kubeconfig ~/.kube/edge-robotics-hub --namespace openshift-gitops get route openshift-gitops-server --output jsonpath='{.spec.host}')"
 #+end_src
 
 
-* Apply openshift gitops application
+** Create tekton pipeline quay.io secret
 
-From here, with openshift gitops running, all we need to do is apply the argocd ~ApplicationSet~ custom resource shown below, which points to a git repository containing our remaining manifests.
+Our model containerisation pipeline on the hub cluster relies on a secret containing credentials to authenticate and push an image to ~quay.io~.
+
+Run the snippet below to create a secret for your quay.io credentials, so we have everything in place to kick off our pipeline.
+
+#+begin_src bash :results silent
+read -p "Enter Quay.io username: "    QUAY_USER && export QUAY_USER
+read -p "Enter Quay.io password: " -s QUAY_PASS && export QUAY_PASS
+
+# Ensure the namespace exists
+oc --kubeconfig ~/.kube/edge-robotics-hub new-project edge-robotics
+
+cat << EOF | oc --kubeconfig ~/.kube/edge-robotics-hub apply --filename -
+apiVersion: v1
+stringData:
+  username: $(echo ${QUAY_USER:-placeholder})
+  password: $(echo ${QUAY_PASS:-placeholder})
+kind: Secret
+metadata:
+  name: push-secret
+  namespace: edge-robotics
+  annotations:
+    tekton.dev/docker-0: https://quay.io
+type: kubernetes.io/basic-auth
+EOF
+#+end_src
+
+
+** Create tekton pipeline with gitops
+
+From here, with openshift gitops running in our hub cluster, all we need to do is apply the argocd ~ApplicationSet~ custom resource shown below, which points to a git repository containing our remaining manifests.
 
 This ~ApplicationSet~ resource will be picked up by ArgoCD and periodically synchronised to our cluster to create an ~Application~ for the openshift pipelines operator as well as the actual pipeline which uses that operator.
 
 #+begin_src bash :results silent
-cat << EOF | oc apply --filename -
+cat << EOF | oc --kubeconfig ~/.kube/edge-robotics-hub apply --filename -
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -157,41 +203,64 @@ EOF
 #+end_src
 
 
-* Create quay.io secret
+* Stage 2 - Deploy model to edge cluster
 
-Our pipeline relies on a secret containing credentials to authenticate and push an image to ~quay.io~.
+We now have a model built into a container image and pushed to ~quay.io~.  Let's get logged into our edge cluster and deploy the model via argocd.
 
-Run the snippet below to create a secret for your quay.io credentials.
+
+** Login to the edge cluster
+
+Before we can run any of the following commands, we need to ensure we are logged in to our edge cluster. Run the following to do so, updating the placeholder values:
 
 #+begin_src bash :results silent
-export QUAY_USER=user_placeholder
-export QUAY_PASS=pass_placeholder
-
-envsubst cat << EOF | oc apply --filename -
-apiVersion: v1
-stringData:
-  username: $QUAY_USER
-  password: $QUAY_PASS
-kind: Secret
-metadata:
-  name: push-secret
-  namespace: edge-robotics
-  annotations:
-    tekton.dev/docker-0: https://quay.io
-type: kubernetes.io/basic-auth
-EOF
+oc login --token=<token> \
+         --server=<cluster> \
+         --kubeconfig ~/.kube/edge-robotics-device \
+         --insecure-skip-tls-verify=true
 #+end_src
+
+
+** Register remote cluster with hub argocd
+
+Once we are authenticated against both clusters we can run the sequence of commands below to onboard the edge device cluster into our hub cluster argocd instance.
+
+This involves:
+
+1. temporarily copying our edge device cluster kubeconfig file (~/.kube/edge-robotics-device~) into the ~openshift-gitops-server~ pod of our hub cluster.
+2. ~exec~ into that hub cluster argocd pod to run ~argocd login~ followed by ~argocd cluster add~.
+
+#+begin_src bash :results silent
+# Retrieve the name of the argocd server pod, argocd admin password, and remote edge cluster kubeconfig context
+export gitops_pod=$(oc --kubeconfig ~/.kube/edge-robotics-hub get pods --namespace openshift-gitops --output name --no-headers=true | grep openshift-gitops-server | sed 's/^.\{4\}//')
+export gitops_pass=$(oc --kubeconfig ~/.kube/edge-robotics-hub get secret --namespace openshift-gitops openshift-gitops-cluster -o jsonpath={.data.admin\\.password} | base64 --decode)
+export remote_context=$(oc --kubeconfig ~/.kube/edge-robotics-device config get-contexts --output name | grep default)
+
+# Run the login command using argocd cli inside pod
+oc --kubeconfig ~/.kube/edge-robotics-hub --namespace openshift-gitops exec "${gitops_pod}" -- argocd login --skip-test-tls --password "${gitops_pass}" --username "admin" "localhost:8080" --config /tmp/config --plaintext
+
+# Copy remote edge device cluster kubeconfig into hub cluster argocd pod
+oc --kubeconfig ~/.kube/edge-robotics-hub --namespace openshift-gitops cp "/home/${USER}/.kube/edge-robotics-device" "${gitops_pod}:/tmp/kubeconfig"
+
+# Register the edge device cluster
+oc --kubeconfig ~/.kube/edge-robotics-hub --namespace openshift-gitops exec "${gitops_pod}" -- argocd cluster add --name edge-robotics-device --kubeconfig /tmp/kubeconfig --config /tmp/config "${remote_context}"
+
+# Clean up the temporary files created
+oc --kubeconfig ~/.kube/edge-robotics-hub --namespace openshift-gitops exec "${gitops_pod}" -- rm /tmp/config /tmp/kubeconfig
+#+end_src
+
+
+Congratulations! After following through the process up to this point, following a brief wait for ArgoCD to sync you should now see an edge robotics ~namespace~ and ~pod~ deployed to the remote edge device cluster 🎉🚀
 
 
 * Teardown
 
-Finished with the demo environment and want to remove all edge robotics content from the cluster? No problem, just run the section below:
+Finished with the demo environment and want to remove all edge robotics content from the hub cluster? No problem, just run the section below:
 
 #+begin_src bash :results silent
 # Delete applicationset
-oc --namespace openshift-gitops delete applicationset edge-robotics-pipeline
+oc --kubeconfig ~/.kube/edge-robotics-hub --namespace openshift-gitops delete applicationset edge-robotics-pipeline
 
 # Delete the project
-oc delete --ignore-not-found=true project edge-robotics
+oc --kubeconfig ~/.kube/edge-robotics-hub delete --ignore-not-found=true project edge-robotics
 #+end_src
 

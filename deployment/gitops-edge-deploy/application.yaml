@@ -1,0 +1,19 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gitops-edge-deploy-child
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: edge-robotics
+    name: edge-robotics-device
+  project: default
+  source:
+    path: manifest
+    repoURL: https://github.com/tnscorcoran/GuiseAI-Openshift
+  syncPolicy:
+    automated:
+      prune: true
+    syncOptions:
+      - CreateNamespace=true
