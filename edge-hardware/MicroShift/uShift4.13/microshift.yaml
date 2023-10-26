@@ -44,6 +44,12 @@
       name: ['microshift', 'microshift-greenboot' ]
       state: present
 
+  - name: Install other goodies like git
+    yum:
+      name: ['git' ]
+      state: present
+
+
   - name: Enable Firewalld
     systemd:
       name: firewalld
