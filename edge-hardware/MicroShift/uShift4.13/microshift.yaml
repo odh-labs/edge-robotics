@@ -91,3 +91,9 @@
 
   - name: Create kubeconfig in /home/redhat/.kube/config
     ansible.builtin.shell: sudo cat /var/lib/microshift/resources/kubeadmin/kubeconfig > /home/redhat/.kube/config
+
+  - name: set ownership of /home/redhat/.kube/config to 'redhat' user
+    file:
+      path: /home/redhat/.kube/config 
+      owner: "redhat"
+      group: "redhat"
