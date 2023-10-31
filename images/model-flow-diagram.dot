@@ -15,8 +15,8 @@ digraph {
 
         subgraph {
             model [
-                label = <{<b>1 - Build Model</b>
-                | a) RHODS Notebook builds model with pytorch.  |
+                label = <{<b>1 - Build model</b>
+                | a) RHODS Notebook builds model with pytorch.   |
                 b) RHODS Notebook saves model pytorch pt file.|
                 c) RHODS Notebook pushes pytorch pt file to git. }>
             ];
@@ -24,55 +24,35 @@ digraph {
 
         subgraph  {
             container [
-                label = <{<b>2 - Containerise + Attest Model</b>
-                | a) Tekton CI EventListener running in OpenShift.    |
-                b) Github fires webhook to Tekton EventListener.    |
-                c) Tekton Trigger validates the github push event.   |
-                d) Tekton Task clones codebase into workspace.    |
-                e) Tekton Task builds container image locally.         |
-                f) Tekton Task signs container image with cosign.   |
-                g) Tekton Task pushes image + signatures to quay.|
-                h) Tekton Task raises git pr for new image digest.   }>
+                label = <{<b>2 - Containerise model on hub cluster</b>
+                | a) Tekton build pipeline manually triggered.       |
+                b) Tekton Task clones codebase into workspace.|
+                c) Tekton Task builds container image locally       |
+                d) Tekton Task pushes image to quay.                 }>
             ];
         }
 
         subgraph  {
-            approve [
-                label = <{<b>3 - Approve Deployment</b>
-                | a) GitHub pull request validates new container image.|
-                 b) GitHub pull request merged to signify approval.       }>
-            ];
-        }
-
-        subgraph  {
-            pull [
-                label = <{<b>4a - Pull + Verify + Run Model</b>
-                | a) Edge Device scheduled process pulls new image.|
-                b) New image has provenance verified locally.         |
-                c) New container starts up and becomes healthy.      |
-                d) New container assumes primary operations.         |
-                d) Old container is killed and old image pruned.       }>
+            gitops [
+                label = <{<b>3 - Onboard edge device cluster</b>
+                | a) Tekton cluster add pipeline manually triggered .|
+                 b) Remote edge cluster added to hub gitops.         }>
             ];
         }
 
         subgraph  {
             push [
-                label = <{<b>4b - Push + Verify + Run Model</b>
-                | a) Edge device cluster is a ManagedCluster in RHACM.  |
-                b) Edge cluster organised into ManagedClusterSet.         |
-                c) RHACM Placement instructs new Model to be pushed.|
-                d) Edge Device cluster pulls new image.                           |
-                e) New image has provenance verified locally.                 |
-                f) New container starts up and becomes healthy.             |
-                g) New container assumes primary operations.                |
-                h) Old container is killed and old image pruned.               }>
+                label = <{<b>4b - Push and run model at edge</b>
+                | a) Openshift gitops syncs model deployment to edge.|
+                b) Edge device cluster pulls new model image.           |
+                c) New container starts up and becomes healthy.        |
+                d) Model is serving via openshift route.                       }>
             ];
         }
 
         # Link the subgraphs together
         model -> container
-        container -> approve
-        approve -> pull
-        approve -> push
+        container -> gitops
+        gitops -> push
     }
 }

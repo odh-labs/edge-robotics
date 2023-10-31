@@ -1,0 +1,52 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: cluster-onboarding-pipeline
+  namespace: openshift-gitops
+spec:
+  params:
+    - name: EDGE_DEVICE_KUBERNETES_API
+      type: string
+      description: The api server address for the edge device.
+    - name: EDGE_DEVICE_USER
+      type: string
+      description: The username for the edge device api server.
+      default: admin
+    - name: EDGE_DEVICE_PASSWORD
+      type: string
+      description: The password for the edge device api server.
+      default: placeholder
+  tasks:
+    - name: openshift-client
+      params:
+        - name: SCRIPT
+          value: |
+            # Retrieve the name of the argocd server pod
+            export gitops_pod=$(oc get pods --namespace openshift-gitops --output name --no-headers=true | grep openshift-gitops-server | sed 's/^.\{4\}//')
+
+            echo "Gitops pod identified: ${gitops_pod}."
+
+            # Retrieve the argocd admin password
+            export gitops_pass=$(oc get secret --namespace openshift-gitops openshift-gitops-cluster -o jsonpath={.data.admin\\.password} | base64 --decode)
+
+            # Login to the remote edge device cluster and retrieve kubecontext
+            oc login --server $(params.EDGE_DEVICE_KUBERNETES_API) --kubeconfig /tmp/edge-robotics-device --insecure-skip-tls-verify=true --username $(params.EDGE_DEVICE_USER) --password $(params.EDGE_DEVICE_PASSWORD)
+
+            export remote_context=$(oc --kubeconfig /tmp/edge-robotics-device config get-contexts --output name | grep default)
+
+            echo "Remote kubeconfig context is: ${remote_context}."
+
+            # Run the login command using argocd cli inside pod
+            oc --namespace openshift-gitops exec "${gitops_pod}" -- argocd login --skip-test-tls --password "${gitops_pass}" --username "admin" "localhost:8080" --config /tmp/config --plaintext
+
+            # Copy remote edge device cluster kubeconfig into hub cluster argocd pod
+            oc --namespace openshift-gitops cp "/tmp/edge-robotics-device" "${gitops_pod}:/tmp/kubeconfig"
+
+            # Register the edge device cluster
+            oc --namespace openshift-gitops exec "${gitops_pod}" -- argocd cluster add --name edge-robotics-device --kubeconfig /tmp/kubeconfig --config /tmp/config "${remote_context}"
+        - name: VERSION
+          value: latest
+      taskRef:
+        kind: ClusterTask
+        name: openshift-client
