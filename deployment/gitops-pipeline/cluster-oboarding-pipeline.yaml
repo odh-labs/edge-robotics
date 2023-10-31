@@ -21,22 +21,20 @@ spec:
     - name: openshift-client
       params:
         - name: SCRIPT
-          value: >+
+          value: |
             # Retrieve the name of the argocd server pod
-            export gitops_pod=$(oc get pods --namespace openshift-gitops
-            --output name --no-headers=true | grep openshift-gitops-server | sed
-            's/^.\{4\}//')
-            echo  "Gitops pod identified: ${gitops_pod}."
+            export gitops_pod=$(oc get pods --namespace openshift-gitops --output name --no-headers=true | grep openshift-gitops-server | sed 's/^.\{4\}//')
+
+            echo "Gitops pod identified: ${gitops_pod}."
 
             # Retrieve the argocd admin password
             export gitops_pass=$(oc get secret --namespace openshift-gitops openshift-gitops-cluster -o jsonpath={.data.admin\\.password} | base64 --decode)
 
             # Login to the remote edge device cluster and retrieve kubecontext
-            oc login --server $(params.EDGE_DEVICE_KUBERNETES_API) \
-              --kubeconfig /tmp/edge-robotics-device --insecure-skip-tls-verify=true \
-              --username $(params.EDGE_DEVICE_USER) --password $(params.EDGE_DEVICE_PASSWORD)
+            oc login --server $(params.EDGE_DEVICE_KUBERNETES_API) --kubeconfig /tmp/edge-robotics-device --insecure-skip-tls-verify=true --username $(params.EDGE_DEVICE_USER) --password $(params.EDGE_DEVICE_PASSWORD)
 
             export remote_context=$(oc --kubeconfig /tmp/edge-robotics-device config get-contexts --output name | grep default)
+
             echo "Remote kubeconfig context is: ${remote_context}."
 
             # Run the login command using argocd cli inside pod
