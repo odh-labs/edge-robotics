@@ -161,7 +161,7 @@ spec:
   goTemplateOptions: ["missingkey=error"]
   generators:
     - git:
-        repoURL: https://github.com/jmhbnz/edge-robotics.git
+        repoURL: https://github.com/odh-labs/edge-robotics.git
         revision: main
         directories:
           - path: deployment/gitops*
@@ -171,7 +171,7 @@ spec:
     spec:
       project: "default"
       source:
-        repoURL: https://github.com/jmhbnz/edge-robotics.git
+        repoURL: https://github.com/odh-labs/edge-robotics.git
         targetRevision: main
         path: '{{.path.path}}'
       destination:
@@ -205,11 +205,11 @@ spec:
       value: placeholder
     - name: EDGE_DEVICE_USER
       value: admin
-    -name: EDGE_DEVICE_PASSWORD
-      value: password
+    - name: EDGE_DEVICE_PASSWORD
+      value: placeholder
   pipelineRef:
-    name: model-pipeline
-  serviceAccountName: pipeline
+    name: cluster-onboarding-pipeline
+  serviceAccountName: openshift-gitops-argocd-application-controller
 EOF
 #+end_src
 
