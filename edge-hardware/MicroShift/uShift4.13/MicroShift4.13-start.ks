@@ -16,7 +16,7 @@ part /boot --fstype=xfs --asprimary --size=800
 part pv.01 --grow
 volgroup rhel pv.01
 logvol / --vgname=rhel --fstype=xfs --size=19480 --name=root
-logvol /swap --vgname=swap --name=swap --recommended
+logvol swap --fstype="swap" --name=swap --vgname=rhel --hibernation
 
 # Configure users
 rootpw --lock
