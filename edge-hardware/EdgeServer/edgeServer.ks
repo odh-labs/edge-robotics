@@ -4,6 +4,19 @@ timezone Australia/Sydney
 text
 reboot
 
+# Partition disk with a 1GB boot XFS partition and a 10GB LVM volume containing system root
+# The remainder of the volume will be used by the CSI driver for storing data
+zerombr
+clearpart --all --initlabel
+autopart
+
+#part /boot/efi --fstype=efi --size=200
+#part /boot --fstype=xfs --asprimary --size=800
+#part pv.01 --grow
+#volgroup rhel pv.01
+#logvol / --vgname=rhel --fstype=xfs --size=50000 --name=root
+#logvol swap --fstype="swap" --name=swap --vgname=rhel --hibernation
+
 # Configure network to use DHCP and activate on boot
 network --bootproto=dhcp --device=link --activate --onboot=on
 network --device=enp1s0 --hostname=workshop-edge-utils --bootproto=dhcp
@@ -11,18 +24,6 @@ network --device=enp0s31f6 --bootproto=static --ip=192.168.40.1 --netmask=255.25
 firstboot --disable
 selinux --enforcing
 #firewall --enabled
-
-
-# Partition disk with a 1GB boot XFS partition and a 10GB LVM volume containing system root
-# The remainder of the volume will be used by the CSI driver for storing data
-zerombr
-clearpart --all --initlabel
-part /boot/efi --fstype=efi --size=200
-part /boot --fstype=xfs --asprimary --size=800
-part pv.01 --grow
-volgroup rhel pv.01
-logvol / --vgname=rhel --fstype=xfs --size=50000 --name=root
-logvol swap --fstype="swap" --name=swap --vgname=rhel --hibernation
 
 # Configure users
 #rootpw $2b$10$C0ecnR5cPoWFuJiMv4O6duYr01t8qdkF6pG2t5b.6BKiEtpSekC22 --iscrypted
