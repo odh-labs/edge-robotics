@@ -1,7 +1,7 @@
 TODAY=$(date +%F_%H-%M-%S)
 VMNAME=EdgeServer9.2-$TODAY
 DVDISO=/var/lib/libvirt/images/rhel-9.2-$(uname -m)-dvd.iso
-KICKSTART=https://raw.githubusercontent.com/odh-labs/edge-robotics/main/edge-hardware/MicroShift/uShift4.13/edgeServer.ks
+KICKSTART=https://raw.githubusercontent.com/odh-labs/edge-robotics/main/edge-hardware/EdgeServer/edgeServer.ks
 
 
 #sudo -b bash -c " \
