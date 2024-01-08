@@ -6,6 +6,7 @@ keyboard us
 timezone Australia/Sydney 
 rootpw $2b$10$C0ecnR5cPoWFuJiMv4O6duYr01t8qdkF6pG2t5b.6BKiEtpSekC22 --iscrypted
 user --name=ansible --groups=wheel --password=$2b$10$C0ecnR5cPoWFuJiMv4O6duYr01t8qdkF6pG2t5b.6BKiEtpSekC22 --iscrypted
+user --plaintext --name=redhat --password=redhat
 reboot
 cdrom
 bootloader --append="rhgb quiet crashkernel=1G-4G:192M,4G-64G:256M,64G-:512M"
