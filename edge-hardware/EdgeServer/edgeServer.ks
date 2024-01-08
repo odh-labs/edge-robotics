@@ -13,6 +13,10 @@ bootloader --append="rhgb quiet crashkernel=1G-4G:192M,4G-64G:256M,64G-:512M"
 zerombr
 clearpart --all --initlabel
 autopart
+
+# Allow the default user to run sudo commands without password
+echo -e 'redhat\tALL=(ALL)\tNOPASSWD: ALL' > /etc/sudoers.d/microshift
+
 network --device=enp1s0 --hostname=workshop-edge-utils --bootproto=dhcp
 network --device=enp0s31f6 --bootproto=static --ip=192.168.40.1 --netmask=255.255.255.0
 firstboot --disable
