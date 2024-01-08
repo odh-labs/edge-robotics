@@ -13,7 +13,7 @@ virt-install \
     --memory 16348 \
     --disk path=./${VMNAME}.qcow2,size=100 \
     --network network=default,model=virtio \
-    --network network=default,model=virtio \
+    --network  \
     --events on_reboot=restart \
     --location ${DVDISO} \
     --extra-args \"inst.ks=${KICKSTART}\" \
