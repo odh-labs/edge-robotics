@@ -14,8 +14,7 @@ zerombr
 clearpart --all --initlabel
 autopart
 
-# Allow the default user to run sudo commands without password
-echo -e 'redhat\tALL=(ALL)\tNOPASSWD: ALL' > /etc/sudoers.d/microshift
+
 
 network --device=enp1s0 --hostname=workshop-edge-utils --bootproto=dhcp
 network --device=enp0s31f6 --bootproto=static --ip=192.168.40.1 --netmask=255.255.255.0
@@ -26,4 +25,8 @@ firewall --enabled
 #@^graphical-server-environment
 wpa_supplicant
 #tigervnc-server
+
+# Allow the default user to run sudo commands without password
+echo -e 'redhat\tALL=(ALL)\tNOPASSWD: ALL' > /etc/sudoers.d/microshift
+
 %end
