@@ -26,8 +26,8 @@ selinux --enforcing
 #firewall --enabled
 
 # Configure users
-#rootpw $2b$10$C0ecnR5cPoWFuJiMv4O6duYr01t8qdkF6pG2t5b.6BKiEtpSekC22 --iscrypted
-rootpw --lock
+rootpw $2b$10$C0ecnR5cPoWFuJiMv4O6duYr01t8qdkF6pG2t5b.6BKiEtpSekC22 --iscrypted
+#rootpw --lock
 user --plaintext --name=redhat --password=redhat
 user --name=ansible --groups=wheel --password=$2b$10$C0ecnR5cPoWFuJiMv4O6duYr01t8qdkF6pG2t5b.6BKiEtpSekC22 --iscrypted
 
