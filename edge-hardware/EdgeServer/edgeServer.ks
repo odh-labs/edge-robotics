@@ -19,7 +19,7 @@ autopart
 
 # Configure network to use DHCP and activate on boot
 network --bootproto=dhcp --device=link --activate --onboot=on
-network --device=enp1s0 --hostname=workshop-edge-utils --bootproto=dhcp
+network --device=enp1s0 --hostname=edge-manager-local --bootproto=dhcp
 network --device=enp0s31f6 --bootproto=static --ip=192.168.40.1 --netmask=255.255.255.0
 firstboot --disable
 selinux --enforcing
